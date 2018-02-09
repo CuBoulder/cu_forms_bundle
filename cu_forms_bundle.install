@@ -7,5 +7,10 @@ function cu_forms_bundle_enable() {
   //module_enable(FROM .INFO?);
 }
 
-
-
+/*
+ * Express 2.8.5 update
+ * Add schema version to diff bundles.
+ */
+function cu_forms_bundle_update_7001() {
+  // This space intentionally left blank.
+}
