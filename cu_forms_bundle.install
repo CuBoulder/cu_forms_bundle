@@ -14,3 +14,10 @@ function cu_forms_bundle_enable() {
 function cu_forms_bundle_update_7001() {
   // This space intentionally left blank.
 }
+
+/**
+ * Update permissions for new form owner role.
+ */
+function cu_forms_bundle_update_7001() {
+  secure_permissions_rebuild();
+}
