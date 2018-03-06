@@ -18,6 +18,6 @@ function cu_forms_bundle_update_7001() {
 /**
  * Update permissions for new form owner role.
  */
-function cu_forms_bundle_update_7001() {
+function cu_forms_bundle_update_7002() {
   secure_permissions_rebuild();
 }
