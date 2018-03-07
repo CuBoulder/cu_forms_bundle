@@ -1,17 +1,5 @@
 <?php
 
-/**
- * Define site permissions in code.
- *
- * Create a secure_permissions_data module directory and place this function
- * in secure_permissions_data.module.
- *
- * @param $role
- *   The role for which the permissions are being requested.
- *
- * @return
- *   An array defining all the permissions for the site.
- */
 
 /**
  * Define site roles in code.
@@ -27,6 +15,19 @@ function cu_forms_bundle_secure_permissions_roles() {
     'form_owner',
   );
 }
+
+/**
+ * Define site permissions in code.
+ *
+ * Create a secure_permissions_data module directory and place this function
+ * in secure_permissions_data.module.
+ *
+ * @param $role
+ *   The role for which the permissions are being requested.
+ *
+ * @return
+ *   An array defining all the permissions for the site.
+ */
 
 function cu_forms_bundle_secure_permissions($role) {
   $permissions = array(
