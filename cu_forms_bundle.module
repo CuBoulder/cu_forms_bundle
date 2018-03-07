@@ -13,8 +13,23 @@
  *   An array defining all the permissions for the site.
  */
 
+/**
+ * Define site roles in code.
+ *
+ * Create a secure_permissions_data module directory and place this function
+ * in secure_permissions_data.module.
+ *
+ * @return
+ *   An array defining all the roles for the site.
+ */
+function cu_forms_bundle_secure_permissions_roles() {
+  return array(
+    'form_owner',
+  );
+}
+
 function cu_forms_bundle_secure_permissions($role) {
-   $permissions = array(
+  $permissions = array(
     'administrator' => array(
       'access all webform results',
       'access own webform results',
@@ -36,24 +51,13 @@ function cu_forms_bundle_secure_permissions($role) {
       'delete own webform submissions',
       'edit own webform submissions',
     ),
-    'content_editor' => array(
+    'form_owner' => array(
       'access own webform results',
       'create webform content',
       'delete any webform content',
       'delete own webform content',
       'edit any webform content',
       'edit own webform content',
-      'edit webform components',
-    ),
-    'form_owner' => array(
-      'access own webform results',
-      'access own webform submissions',
-      'administer cu feedback module',
-      'create webform content',
-      'delete own webform content',
-      'delete own webform submissions',
-      'edit own webform content',
-      'edit own webform submissions',
       'edit webform components',
     ),
     'developer' => array(
@@ -226,4 +230,3 @@ function cu_forms_bundle_form_webform_component_edit_form_alter(&$form, &$form_s
   );
   $form['validation']['extensions']['addextensions']['#default_value'] = '';
 }
-
