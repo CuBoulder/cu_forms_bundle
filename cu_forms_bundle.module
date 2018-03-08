@@ -245,8 +245,11 @@ function cu_forms_bundle_form_webform_component_edit_form_alter(&$form, &$form_s
  * Implements hook_menu_alter().
  */
 function cu_forms_bundle_menu_alter(&$items) {
-  $items['node/%webform_menu/webform-results']['access callback'] = 'cu_forms_bundle_webform_results_access';
-  $items['node/%webform_menu/submission/%webform_menu_submission']['access callback'] = 'cu_forms_bundle_webform_results_access';
+  $rid = 8;
+  if (user_has_role($rid)) {
+    $items['node/%webform_menu/webform-results']['access callback'] = 'cu_forms_bundle_webform_results_access';
+    $items['node/%webform_menu/submission/%webform_menu_submission']['access callback'] = 'cu_forms_bundle_webform_results_access';
+  }
 }
 
 /**
@@ -294,13 +297,10 @@ function cu_forms_bundle_webform_access($node, $account = NULL) {
 }
 
 function cu_forms_bundle_form_webform_node_form_alter(&$form, &$form_state, $form_id) {
-  dpm($form);
   global $user;
   $uid = $user->uid;
   $author = $form['uid']['#value'];
   $rid = 8;
-  dpm($uid);
-  dpm($author);
 
   if ($uid !== $author && user_has_role($rid)) {
     drupal_set_message(t('hello'));
