@@ -67,7 +67,6 @@ function cu_forms_bundle_secure_permissions($role) {
       'create webform content',
       'delete any webform content',
       'delete own webform content',
-      'edit any webform content',
       'edit own webform content',
       'edit webform components',
     ),
@@ -287,41 +286,24 @@ function cu_forms_bundle_webform_access($node, $account = NULL) {
     }
   }
 
+  if ($node->uid === $user->uid) {
+    $access = TRUE;
+  }
+
   return $access;
 }
 
-/**
- * Delete after devel use.
- */
-function cu_forms_bundle_page_alter(&$page) {
+function cu_forms_bundle_form_webform_node_form_alter(&$form, &$form_state, $form_id) {
+  dpm($form);
   global $user;
-  if (arg(0) == 'node' && is_numeric(arg(1))) {
-    // Get the nid
-    $nid = arg(1);
+  $uid = $user->uid;
+  $author = $form['uid']['#value'];
+  $rid = 8;
+  dpm($uid);
+  dpm($author);
 
-    // Load the node if you need to
-    $node = node_load($nid);
+  if ($uid !== $author && user_has_role($rid)) {
+    drupal_set_message(t('hello'));
+    $form['field_webform_results_access']['#access'] = 0;
   }
-  $uid_form_sub = $node->field_webform_results_access['und'];
-  foreach ($uid_form_sub as $uid) {
-    if (in_array($user->uid, $uid)) {
-      dpm('Holy shit, it worked!');
-    }
-  }
-
-  //dpm($node->field_webform_results_access[LANGUAGE_NONE][0]['value']);
 }
-
-
-/*
-  $access = FALSE;
-  $uid_form_sub = $node->field_user_entity_reference['und'];
-
-  foreach ($uid_form_sub as $uid) {
-    if (in_array($account->uid, $uid)) {
-      $access = TRUE;
-    }
-  }
-
-  return $access;
- */
