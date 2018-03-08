@@ -20,4 +20,5 @@ function cu_forms_bundle_update_7001() {
  */
 function cu_forms_bundle_update_7002() {
   secure_permissions_rebuild();
+  cu_core_revert_features();
 }

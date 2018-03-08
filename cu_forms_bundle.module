@@ -62,6 +62,7 @@ function cu_forms_bundle_secure_permissions($role) {
       'edit webform components',
     ),
     'form_owner' => array(
+      'access all webform results',
       'access own webform results',
       'create webform content',
       'delete any webform content',
@@ -240,3 +241,87 @@ function cu_forms_bundle_form_webform_component_edit_form_alter(&$form, &$form_s
   );
   $form['validation']['extensions']['addextensions']['#default_value'] = '';
 }
+
+/**
+ * Implements hook_menu_alter().
+ */
+function cu_forms_bundle_menu_alter(&$items) {
+  $items['node/%webform_menu/webform-results']['access callback'] = 'cu_forms_bundle_webform_results_access';
+  $items['node/%webform_menu/submission/%webform_menu_submission']['access callback'] = 'cu_forms_bundle_webform_results_access';
+}
+
+/**
+ * Implementation of hook_webform_results_access().
+ */
+function cu_forms_bundle_webform_results_access($node, $account = NULL) {
+  return cu_forms_bundle_webform_access($node, $account);
+}
+
+/**
+ * Implementation of hook_webform_submission_access().
+ */
+function cu_forms_bundle_webform_submission_access($node, $submission, $op = 'view', $account = NULL) {
+  return cu_forms_bundle_webform_access($node, $account);
+}
+
+/**
+ * Returns true if account is a value in the webform results user
+ * reference field on the webform content type.
+ *
+ * @param object $node
+ *   The webform node.
+ * @param object $account
+ *   The user account, optional. Defaults to current user.
+ *
+ * @return bool
+ *   Returns true if user is listed, false otherwise.
+ */
+function cu_forms_bundle_webform_access($node, $account = NULL) {
+  global $user;
+  $access = FALSE;
+  $uid_form_sub = $node->field_webform_results_access['und'];
+
+  foreach ($uid_form_sub as $uid) {
+    if (in_array($user->uid, $uid)) {
+      $access = TRUE;
+    }
+  }
+
+  return $access;
+}
+
+/**
+ * Delete after devel use.
+ */
+function cu_forms_bundle_page_alter(&$page) {
+  global $user;
+  if (arg(0) == 'node' && is_numeric(arg(1))) {
+    // Get the nid
+    $nid = arg(1);
+
+    // Load the node if you need to
+    $node = node_load($nid);
+  }
+  $uid_form_sub = $node->field_webform_results_access['und'];
+  foreach ($uid_form_sub as $uid) {
+    if (in_array($user->uid, $uid)) {
+      dpm('Holy shit, it worked!');
+    }
+  }
+
+  //dpm($node->field_webform_results_access[LANGUAGE_NONE][0]['value']);
+}
+
+
+/*
+  $access = FALSE;
+  $uid_form_sub = $node->field_user_entity_reference['und'];
+
+  foreach ($uid_form_sub as $uid) {
+    if (in_array($account->uid, $uid)) {
+      $access = TRUE;
+    }
+  }
+
+  return $access;
+ */

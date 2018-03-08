@@ -10,13 +10,13 @@
 function cu_webform_field_default_field_bases() {
   $field_bases = array();
 
-  // Exported field_base: 'field_user_entity_reference'.
-  $field_bases['field_user_entity_reference'] = array(
+  // Exported field_base: 'field_webform_results_access'.
+  $field_bases['field_webform_results_access'] = array(
     'active' => 1,
     'cardinality' => -1,
     'deleted' => 0,
     'entity_types' => array(),
-    'field_name' => 'field_user_entity_reference',
+    'field_name' => 'field_webform_results_access',
     'indexes' => array(
       'target_id' => array(
         0 => 'target_id',

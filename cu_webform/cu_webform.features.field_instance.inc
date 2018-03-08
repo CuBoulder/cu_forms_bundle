@@ -11,7 +11,7 @@ function cu_webform_field_default_field_instances() {
   $field_instances = array();
 
   // Exported field_instance: 'node-webform-field_user_entity_reference'.
-  $field_instances['node-webform-field_user_entity_reference'] = array(
+  $field_instances['node-webform-field_webform_results_access'] = array(
     'bundle' => 'webform',
     'default_value' => NULL,
     'deleted' => 0,
@@ -32,7 +32,7 @@ function cu_webform_field_default_field_instances() {
     ),
     'entity_type' => 'node',
     'fences_wrapper' => 'div_div_div',
-    'field_name' => 'field_user_entity_reference',
+    'field_name' => 'field_webform_results_access',
     'label' => 'Allow the following users to view submissions',
     'required' => 0,
     'settings' => array(
