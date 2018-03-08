@@ -245,7 +245,8 @@ function cu_forms_bundle_form_webform_component_edit_form_alter(&$form, &$form_s
  * Implements hook_menu_alter().
  */
 function cu_forms_bundle_menu_alter(&$items) {
-  $rid = 8;
+  $list_role = user_roles($membersonly = FALSE, $permission = NULL);
+  $rid = array_search('form_owner', $list_role);
   if (user_has_role($rid)) {
     $items['node/%webform_menu/webform-results']['access callback'] = 'cu_forms_bundle_webform_results_access';
     $items['node/%webform_menu/submission/%webform_menu_submission']['access callback'] = 'cu_forms_bundle_webform_results_access';
@@ -296,11 +297,18 @@ function cu_forms_bundle_webform_access($node, $account = NULL) {
   return $access;
 }
 
+/**
+ * Implement hook_form_ID_alter().
+ *
+ * This hides the user entity reference to non-authors who are also form owners.
+ */
 function cu_forms_bundle_form_webform_node_form_alter(&$form, &$form_state, $form_id) {
   global $user;
+  $list_role = user_roles($membersonly = FALSE, $permission = NULL);
+  $rid = array_search('form_owner', $list_role);
+
   $uid = $user->uid;
   $author = $form['uid']['#value'];
-  $rid = 8;
 
   if ($uid !== $author && user_has_role($rid)) {
     drupal_set_message(t('hello'));
