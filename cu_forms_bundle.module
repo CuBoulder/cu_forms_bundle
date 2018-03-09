@@ -62,7 +62,6 @@ function cu_forms_bundle_secure_permissions($role) {
       'edit webform components',
     ),
     'form_owner' => array(
-      'access all webform results',
       'access own webform results',
       'create webform content',
       'delete any webform content',
