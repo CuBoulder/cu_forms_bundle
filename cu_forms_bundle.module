@@ -247,6 +247,9 @@ function cu_forms_bundle_form_webform_component_edit_form_alter(&$form, &$form_s
 function cu_forms_bundle_menu_alter(&$items) {
   $list_role = user_roles($membersonly = FALSE, $permission = NULL);
   $rid = array_search('form_owner', $list_role);
+
+  // If the user has form owner role, they have view all submissions, so we then cut out access in favor of the
+  // user entity reference field on the webform content type.
   if (user_has_role($rid)) {
     $items['node/%webform_menu/webform-results']['access callback'] = 'cu_forms_bundle_webform_results_access';
     $items['node/%webform_menu/submission/%webform_menu_submission']['access callback'] = 'cu_forms_bundle_webform_results_access';
@@ -255,6 +258,8 @@ function cu_forms_bundle_menu_alter(&$items) {
 
 /**
  * Implementation of hook_webform_results_access().
+ *
+ * Hooks from webform that we need to override to get our own permissions.
  */
 function cu_forms_bundle_webform_results_access($node, $account = NULL) {
   return cu_forms_bundle_webform_access($node, $account);
@@ -282,14 +287,18 @@ function cu_forms_bundle_webform_submission_access($node, $submission, $op = 'vi
 function cu_forms_bundle_webform_access($node, $account = NULL) {
   global $user;
   $access = FALSE;
+
+  // List of all users added via the user entity reference field in webform content type.
   $uid_form_sub = $node->field_webform_results_access['und'];
 
+  // If your user has been added to the node, you can view submissions.
   foreach ($uid_form_sub as $uid) {
     if (in_array($user->uid, $uid)) {
       $access = TRUE;
     }
   }
 
+  // If you are the author of the (webform) node, you can always view submissions.
   if ($node->uid === $user->uid) {
     $access = TRUE;
   }
@@ -304,12 +313,13 @@ function cu_forms_bundle_webform_access($node, $account = NULL) {
  */
 function cu_forms_bundle_form_webform_node_form_alter(&$form, &$form_state, $form_id) {
   global $user;
+  // Get list of roles and then return form owner as $rid.
   $list_role = user_roles($membersonly = FALSE, $permission = NULL);
   $rid = array_search('form_owner', $list_role);
 
+  // Current user and author of the form--if they're a match, they can edit the user entity ref field.
   $uid = $user->uid;
   $author = $form['uid']['#value'];
-
   if ($uid !== $author && user_has_role($rid)) {
     drupal_set_message(t('hello'));
     $form['field_webform_results_access']['#access'] = 0;
