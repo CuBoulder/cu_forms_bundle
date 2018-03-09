@@ -10,8 +10,8 @@
 function cu_webform_field_default_field_instances() {
   $field_instances = array();
 
-  // Exported field_instance: 'node-webform-field_user_entity_reference'.
-  $field_instances['node-webform-field_webform_results_access'] = array(
+  // Exported field_instance: 'node-webform-field_add_form_owner'.
+  $field_instances['node-webform-field_add_form_owner'] = array(
     'bundle' => 'webform',
     'default_value' => NULL,
     'deleted' => 0,
@@ -32,8 +32,8 @@ function cu_webform_field_default_field_instances() {
     ),
     'entity_type' => 'node',
     'fences_wrapper' => 'div_div_div',
-    'field_name' => 'field_webform_results_access',
-    'label' => 'Allow the following users to view submissions',
+    'field_name' => 'field_add_form_owner',
+    'label' => 'Add Form Owner',
     'required' => 0,
     'settings' => array(
       'user_register_form' => FALSE,
@@ -47,13 +47,13 @@ function cu_webform_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'entityreference_autocomplete',
-      'weight' => 32,
+      'weight' => 33,
     ),
   );
 
   // Translatables
   // Included for use with string extractors like potx.
-  t('Allow the following users to view submissions');
+  t('Add Form Owner');
 
   return $field_instances;
 }
