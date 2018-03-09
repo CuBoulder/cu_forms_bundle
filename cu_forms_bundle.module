@@ -250,6 +250,7 @@ function cu_forms_bundle_menu_alter(&$items) {
   // If the user has form owner role, they have view all submissions, so we then cut out access in favor of the
   // user entity reference field on the webform content type.
   if (user_has_role($rid)) {
+    $items['node/%webform_menu/webform']['access callback'] = 'cu_forms_bundle_webform_results_access';
     $items['node/%webform_menu/webform-results']['access callback'] = 'cu_forms_bundle_webform_results_access';
     $items['node/%webform_menu/submission/%webform_menu_submission']['access callback'] = 'cu_forms_bundle_webform_results_access';
   }
@@ -287,10 +288,18 @@ function cu_forms_bundle_webform_access($node, $account = NULL) {
   global $user;
   $access = FALSE;
 
-  // List of all users added via the user entity reference field in webform content type.
+  // List of all users added via the user entity reference fields in the webform content type.
   $uid_form_sub = $node->field_webform_results_access['und'];
+  $uid_form_owner = $node->field_add_form_owner['und'];
 
-  // If your user has been added to the node, you can view submissions.
+  // If your user has been added to the field_add_form_owner, you can view submissions.
+  foreach ($uid_form_owner as $uid) {
+    if (in_array($user->uid, $uid)) {
+      $access = TRUE;
+    }
+  }
+
+  // If your user has been added to the field_webform_results_access, you can view submissions.
   foreach ($uid_form_sub as $uid) {
     if (in_array($user->uid, $uid)) {
       $access = TRUE;
@@ -303,6 +312,35 @@ function cu_forms_bundle_webform_access($node, $account = NULL) {
   }
 
   return $access;
+}
+
+/**
+ * Because cu_forms_bundle_node_access() sends perm errors when a foreach is placed inside the hook.
+ */
+function _check_form_owners($node) {
+  global $user;
+  $uid_form_owner = $node->field_add_form_owner['und'];
+  // If your user has been added to the field_add_form_owner, you can view submissions.
+  foreach ($uid_form_owner as $uid) {
+    if (in_array($user->uid, $uid)) {
+      return TRUE;
+    }
+  }
+}
+
+/**
+ * Implements hook_node_access().
+ */
+function cu_forms_bundle_node_access($node, $op, $account) {
+  $type = 'webform';
+  // If your user has been added to the field_add_form_owner, you can edit the node.
+  if (in_array($type, node_permissions_get_configured_types())) {
+    if ($op == 'update') {
+      if (_check_form_owners($node) || user_access('edit own ' . $type . ' content', $account) && $account->uid == $node->uid) {
+        return NODE_ACCESS_ALLOW;
+      }
+    }
+  }
 }
 
 /**
