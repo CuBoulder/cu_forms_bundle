@@ -3,11 +3,13 @@
  * @file
  * cu_webform.features.field_instance.inc
  */
+
 /**
  * Implements hook_field_default_field_instances().
  */
 function cu_webform_field_default_field_instances() {
   $field_instances = array();
+
   // Exported field_instance: 'node-webform-field_user_entity_reference'.
   $field_instances['node-webform-field_webform_results_access'] = array(
     'bundle' => 'webform',
@@ -51,14 +53,6 @@ function cu_webform_field_default_field_instances() {
   // Translatables
   // Included for use with string extractors like potx.
   t('Allow the following users to view submissions');
-  return $field_instances;
-}
-
-/**
- * Implements hook_field_default_field_instances().
- */
-function cu_webform_field_default_field_instances() {
-  $field_instances = array();
 
   // Exported field_instance: 'node-webform-field_add_form_owner'.
   $field_instances['node-webform-field_add_form_owner'] = array(

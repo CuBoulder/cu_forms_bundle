@@ -3,11 +3,13 @@
  * @file
  * cu_webform.features.field_base.inc
  */
+
 /**
  * Implements hook_field_default_field_bases().
  */
 function cu_webform_field_default_field_bases() {
   $field_bases = array();
+
   // Exported field_base: 'field_webform_results_access'.
   $field_bases['field_webform_results_access'] = array(
     'active' => 1,
@@ -40,14 +42,6 @@ function cu_webform_field_default_field_bases() {
     'translatable' => 0,
     'type' => 'entityreference',
   );
-  return $field_bases;
-}
-
-/**
- * Implements hook_field_default_field_bases().
- */
-function cu_webform_field_default_field_bases() {
-  $field_bases = array();
 
   // Exported field_base: 'field_add_form_owner'.
   $field_bases['field_add_form_owner'] = array(
