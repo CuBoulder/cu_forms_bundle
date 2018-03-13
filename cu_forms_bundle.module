@@ -301,6 +301,26 @@ function cu_forms_bundle_webform_submission_access($node, $submission, $op = 'vi
 }
 
 /**
+ * Because cu_forms_bundle_node_access() sends perm errors when a foreach is placed inside the hook.
+ */
+function _check_form_owners($node) {
+  global $user;
+
+  if (!empty($node->field_add_form_owner)) {
+    $uid_form_owner = $node->field_add_form_owner['und'];
+  } else {
+    $uid_form_owner = array();
+  }
+
+  // If your user has been added to the field_add_form_owner, you can view submissions.
+  foreach ($uid_form_owner as $uid) {
+    if (in_array($user->uid, $uid)) {
+      return TRUE;
+    }
+  }
+}
+
+/**
  * Returns true if account is a value in the webform results user
  * reference field on the webform content type.
  *
@@ -315,15 +335,18 @@ function cu_forms_bundle_webform_submission_access($node, $submission, $op = 'vi
 function cu_forms_bundle_webform_access($node, $account = NULL) {
   global $user;
   $access = FALSE;
-  $uid_form_sub = array();
-  $uid_form_owner = array();
 
   // List of all users added via the user entity reference fields in the webform content type.
-  if ($node->field_add_form_owner) {
+  if (!empty($node->field_webform_results_access)) {
     $uid_form_sub = $node->field_webform_results_access['und'];
+  } else {
+    $uid_form_sub = array();
   }
-  if ($node->field_add_form_owner) {
+
+  if (!empty($node->field_add_form_owner)) {
     $uid_form_owner = $node->field_add_form_owner['und'];
+  } else {
+    $uid_form_owner = array();
   }
 
   // If your user has been added to the field_add_form_owner, you can view submissions.
@@ -346,26 +369,6 @@ function cu_forms_bundle_webform_access($node, $account = NULL) {
   }
 
   return $access;
-}
-
-/**
- * Because cu_forms_bundle_node_access() sends perm errors when a foreach is placed inside the hook.
- */
-function _check_form_owners($node) {
-  global $user;
-
-  if ($node->field_add_form_owner) {
-    $uid_form_owner = $node->field_add_form_owner['und'];
-  } else {
-    $uid_form_owner = array();
-  }
-
-  // If your user has been added to the field_add_form_owner, you can view submissions.
-  foreach ($uid_form_owner as $uid) {
-    if (in_array($user->uid, $uid)) {
-      return TRUE;
-    }
-  }
 }
 
 /**
