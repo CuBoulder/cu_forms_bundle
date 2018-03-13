@@ -405,9 +405,6 @@ function cu_forms_bundle_form_webform_node_form_alter(&$form, &$form_state, $for
   // Alter autocomplete field path.
   $form['field_webform_results_access']['und'][0]['target_id']['#autocomplete_path'] = 'form-users/autocomplete/field_webform_results_access/node/webform';
   $form['field_add_form_owner']['und'][0]['target_id']['#autocomplete_path'] = 'form-users/autocomplete/field_add_form_owner/node/webform';
-
-  dpm($form['field_webform_results_access']['und'][0]['target_id']['#autocomplete_path']);
-  dpm($form['field_add_form_owner']['und'][0]['target_id']['#autocomplete_path']);
 }
 
 /**
