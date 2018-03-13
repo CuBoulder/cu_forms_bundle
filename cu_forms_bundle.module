@@ -16,6 +16,34 @@ function cu_forms_bundle_secure_permissions_roles() {
   );
 }
 
+function cu_forms_bundle_menu() {
+  $items = array();
+
+
+  $items['form-users/autocomplete'] = array(
+    'page callback' => 'form_users_autocomplete',
+    'page arguments' => array('', '', 2),
+    'access arguments' => array('access user profiles'),
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['form-users/autocomplete/field_add_form_owner/node/webform/%'] = array(
+    'page callback' => 'form_users_autocomplete',
+    'page arguments' => array(2, 3, 4, 5),
+    'access arguments' => array('access user profiles'),
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['form-users/autocomplete/field_webform_results_access/node/webform/%'] = array(
+    'page callback' => 'form_users_autocomplete',
+    'page arguments' => array(2, 3, 4, 5),
+    'access arguments' => array('access user profiles'),
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
 /**
  * Define site permissions in code.
  *
@@ -287,10 +315,16 @@ function cu_forms_bundle_webform_submission_access($node, $submission, $op = 'vi
 function cu_forms_bundle_webform_access($node, $account = NULL) {
   global $user;
   $access = FALSE;
+  $uid_form_sub = array();
+  $uid_form_owner = array();
 
   // List of all users added via the user entity reference fields in the webform content type.
-  $uid_form_sub = $node->field_webform_results_access['und'];
-  $uid_form_owner = $node->field_add_form_owner['und'];
+  if ($node->field_add_form_owner) {
+    $uid_form_sub = $node->field_webform_results_access['und'];
+  }
+  if ($node->field_add_form_owner) {
+    $uid_form_owner = $node->field_add_form_owner['und'];
+  }
 
   // If your user has been added to the field_add_form_owner, you can view submissions.
   foreach ($uid_form_owner as $uid) {
@@ -319,7 +353,13 @@ function cu_forms_bundle_webform_access($node, $account = NULL) {
  */
 function _check_form_owners($node) {
   global $user;
-  $uid_form_owner = $node->field_add_form_owner['und'];
+
+  if ($node->field_add_form_owner) {
+    $uid_form_owner = $node->field_add_form_owner['und'];
+  } else {
+    $uid_form_owner = array();
+  }
+
   // If your user has been added to the field_add_form_owner, you can view submissions.
   foreach ($uid_form_owner as $uid) {
     if (in_array($user->uid, $uid)) {
@@ -361,4 +401,80 @@ function cu_forms_bundle_form_webform_node_form_alter(&$form, &$form_state, $for
     drupal_set_message(t('hello'));
     $form['field_webform_results_access']['#access'] = 0;
   }
+
+  // Alter autocomplete field path.
+  $form['field_webform_results_access']['und'][0]['target_id']['#autocomplete_path'] = 'form-users/autocomplete/field_webform_results_access/node/webform';
+  $form['field_add_form_owner']['und'][0]['target_id']['#autocomplete_path'] = 'form-users/autocomplete/field_add_form_owner/node/webform';
+
+  dpm($form['field_webform_results_access']['und'][0]['target_id']['#autocomplete_path']);
+  dpm($form['field_add_form_owner']['und'][0]['target_id']['#autocomplete_path']);
+}
+
+/**
+ * Return suggestions for path autocomplete.
+ *
+ * @param string $search
+ *   The search result.
+ */
+function form_users_autocomplete($field_name, $entity_type, $bundle_name, $string = '') {
+  $instance = field_info_instance($entity_type, $field_name, $bundle_name);
+  $matches = array();
+
+  // Get list of roles and then return form owner as $rid.
+  $list_role = user_roles($membersonly = FALSE, $permission = NULL);
+  $fo_rid = array_search('form_owner', $list_role);
+  $so_rid = array_search('site_owner', $list_role);
+  $ad_rid = array_search('administrator', $list_role);
+  $dev_rid = array_search('developer', $list_role);
+
+  // User entityreference autocomplete fields.
+  if ($instance['widget']['type'] == 'entityreference_autocomplete' && !empty($string)) {
+    $query = db_select('users', 'u');
+    $query->leftJoin('realname', 'rn', 'u.uid = rn.uid');
+    $query->fields('u', array('uid', 'name'));
+    if ($instance['widget']['settings']['match_operator'] == 'CONTAINS') {
+      $query->condition(db_or()
+        ->condition('rn.realname', '%' . db_like($string) . '%', 'LIKE')
+        ->condition('u.name', '%' . db_like($string) . '%', 'LIKE')
+      );
+    }
+    else {
+      $query->condition(db_or()
+        ->condition('rn.realname', db_like($string) . '%', 'LIKE')
+        ->condition('u.name', db_like($string) . '%', 'LIKE')
+      );
+    }
+    $query->range(0, 10);
+    $uids = $query->execute()->fetchCol();
+    $accounts = user_load_multiple($uids);
+
+    foreach ($accounts as $account) {
+      if (array_key_exists($fo_rid, $account->roles) || array_key_exists($so_rid, $account->roles) ||
+          array_key_exists($ad_rid, $account->roles) || array_key_exists($dev_rid, $account->roles)) {
+        $matches[t('!account (@uid)', array('!account' => format_username($account), '@uid' => $account->uid))] = t('!realname (@username)', array('!realname' => format_username($account), '@username' => $account->name));
+      }
+    }
+  }
+  // User autocomplete fields.
+  elseif (!empty($string)) {
+    $query = db_select('users', 'u');
+    $query->leftJoin('realname', 'rn', 'u.uid = rn.uid');
+    $query->fields('u', array('uid', 'name'));
+    $query->condition(db_or()
+      ->condition('rn.realname', db_like($string) . '%', 'LIKE')
+      ->condition('u.name', db_like($string) . '%', 'LIKE')
+    );
+    $query->range(0, 10);
+    $uids = $query->execute()->fetchCol();
+    $accounts = user_load_multiple($uids);
+
+    foreach ($accounts as $account) {
+      if (array_key_exists($fo_rid, $account->roles) || array_key_exists($so_rid, $account->roles) ||
+        array_key_exists($ad_rid, $account->roles) || array_key_exists($dev_rid, $account->roles)) {
+        $matches[$account->name] = t('!realname (@username)', array('!realname' => format_username($account), '@username' => $account->name));
+      }
+    }
+  }
+
+  drupal_json_output($matches);
 }
