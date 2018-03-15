@@ -417,7 +417,6 @@ function cu_forms_bundle_form_webform_node_form_alter(&$form, &$form_state, $for
   if ($uid !== $author && user_has_role($rid)) {
     $form['field_webform_results_access']['#access'] = 0;
   }
-  //dpm($form);
 }
 
 /**
