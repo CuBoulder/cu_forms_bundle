@@ -387,6 +387,20 @@ function cu_forms_bundle_node_access($node, $op, $account) {
 }
 
 /**
+ * Implements hook_widget_form_alter().
+ *
+ * Overrides entityreference autocomplete fields that point to an entity
+ * of type 'user'.
+ */
+function cu_forms_bundle_field_widget_form_alter(&$element, &$form_state, $context) {
+  if ($context['field']['type'] == 'entityreference' && $context['field']['field_name'] == 'field_add_form_owner') {
+    if ($context['field']['settings']['target_type'] == 'user') {
+      $element['target_id']['#autocomplete_path'] = 'form-users/autocomplete/' . $context['field']['field_name'] . '/node/webform';
+    }
+  }
+}
+
+/**
  * Implement hook_form_ID_alter().
  *
  * This hides the user entity reference to non-authors who are also form owners.
@@ -401,13 +415,9 @@ function cu_forms_bundle_form_webform_node_form_alter(&$form, &$form_state, $for
   $uid = $user->uid;
   $author = $form['uid']['#value'];
   if ($uid !== $author && user_has_role($rid)) {
-    drupal_set_message(t('hello'));
     $form['field_webform_results_access']['#access'] = 0;
   }
-
-  // Alter autocomplete field path.
-  $form['field_webform_results_access']['und'][0]['target_id']['#autocomplete_path'] = 'form-users/autocomplete/field_webform_results_access/node/webform';
-  $form['field_add_form_owner']['und'][0]['target_id']['#autocomplete_path'] = 'form-users/autocomplete/field_add_form_owner/node/webform';
+  //dpm($form);
 }
 
 /**
