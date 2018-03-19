@@ -54,8 +54,8 @@ function cu_webform_field_default_field_instances() {
   // Included for use with string extractors like potx.
   t('Allow the following users to view submissions');
 
-  // Exported field_instance: 'node-webform-field_add_form_owner'.
-  $field_instances['node-webform-field_add_form_owner'] = array(
+  // Exported field_instance: 'node-webform-field_add_form_manager'.
+  $field_instances['node-webform-field_add_form_manager'] = array(
     'bundle' => 'webform',
     'default_value' => NULL,
     'deleted' => 0,
@@ -76,7 +76,7 @@ function cu_webform_field_default_field_instances() {
     ),
     'entity_type' => 'node',
     'fences_wrapper' => 'div_div_div',
-    'field_name' => 'field_add_form_owner',
+    'field_name' => 'field_add_form_manager',
     'label' => 'Add Form Owner',
     'required' => 0,
     'settings' => array(

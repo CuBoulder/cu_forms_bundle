@@ -43,13 +43,13 @@ function cu_webform_field_default_field_bases() {
     'type' => 'entityreference',
   );
 
-  // Exported field_base: 'field_add_form_owner'.
-  $field_bases['field_add_form_owner'] = array(
+  // Exported field_base: 'field_add_form_manager'.
+  $field_bases['field_add_form_manager'] = array(
     'active' => 1,
     'cardinality' => -1,
     'deleted' => 0,
     'entity_types' => array(),
-    'field_name' => 'field_add_form_owner',
+    'field_name' => 'field_add_form_manager',
     'indexes' => array(
       'target_id' => array(
         0 => 'target_id',

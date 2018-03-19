@@ -12,7 +12,7 @@
  */
 function cu_forms_bundle_secure_permissions_roles() {
   return array(
-    'form_owner',
+    'form_manager',
   );
 }
 
@@ -27,7 +27,7 @@ function cu_forms_bundle_menu() {
     'type' => MENU_CALLBACK,
   );
 
-  $items['form-users/autocomplete/field_add_form_owner/node/webform/%'] = array(
+  $items['form-users/autocomplete/field_add_form_manager/node/webform/%'] = array(
     'page callback' => 'form_users_autocomplete',
     'page arguments' => array(2, 3, 4, 5),
     'access arguments' => array('access user profiles'),
@@ -89,7 +89,7 @@ function cu_forms_bundle_secure_permissions($role) {
       'edit own webform content',
       'edit webform components',
     ),
-    'form_owner' => array(
+    'form_manager' => array(
       'access own webform results',
       'create webform content',
       'delete any webform content',
@@ -273,7 +273,7 @@ function cu_forms_bundle_form_webform_component_edit_form_alter(&$form, &$form_s
  */
 function cu_forms_bundle_menu_alter(&$items) {
   $list_role = user_roles($membersonly = FALSE, $permission = NULL);
-  $rid = array_search('form_owner', $list_role);
+  $rid = array_search('form_manager', $list_role);
 
   // If the user has form owner role, they have view all submissions, so we then cut out access in favor of the
   // user entity reference field on the webform content type.
@@ -303,17 +303,17 @@ function cu_forms_bundle_webform_submission_access($node, $submission, $op = 'vi
 /**
  * Because cu_forms_bundle_node_access() sends perm errors when a foreach is placed inside the hook.
  */
-function _check_form_owners($node) {
+function _check_form_managers($node) {
   global $user;
 
-  if (!empty($node->field_add_form_owner)) {
-    $uid_form_owner = $node->field_add_form_owner['und'];
+  if (!empty($node->field_add_form_manager)) {
+    $uid_form_manager = $node->field_add_form_manager['und'];
   } else {
-    $uid_form_owner = array();
+    $uid_form_manager = array();
   }
 
-  // If your user has been added to the field_add_form_owner, you can view submissions.
-  foreach ($uid_form_owner as $uid) {
+  // If your user has been added to the field_add_form_manager, you can view submissions.
+  foreach ($uid_form_manager as $uid) {
     if (in_array($user->uid, $uid)) {
       return TRUE;
     }
@@ -343,14 +343,14 @@ function cu_forms_bundle_webform_access($node, $account = NULL) {
     $uid_form_sub = array();
   }
 
-  if (!empty($node->field_add_form_owner)) {
-    $uid_form_owner = $node->field_add_form_owner['und'];
+  if (!empty($node->field_add_form_manager)) {
+    $uid_form_manager = $node->field_add_form_manager['und'];
   } else {
-    $uid_form_owner = array();
+    $uid_form_manager = array();
   }
 
-  // If your user has been added to the field_add_form_owner, you can view submissions.
-  foreach ($uid_form_owner as $uid) {
+  // If your user has been added to the field_add_form_manager, you can view submissions.
+  foreach ($uid_form_manager as $uid) {
     if (in_array($user->uid, $uid)) {
       $access = TRUE;
     }
@@ -376,10 +376,10 @@ function cu_forms_bundle_webform_access($node, $account = NULL) {
  */
 function cu_forms_bundle_node_access($node, $op, $account) {
   $type = 'webform';
-  // If your user has been added to the field_add_form_owner, you can edit the node.
+  // If your user has been added to the field_add_form_manager, you can edit the node.
   if (in_array($type, node_permissions_get_configured_types())) {
     if ($op == 'update') {
-      if (_check_form_owners($node) || user_access('edit own ' . $type . ' content', $account) && $account->uid == $node->uid) {
+      if (_check_form_managers($node) || user_access('edit own ' . $type . ' content', $account) && $account->uid == $node->uid) {
         return NODE_ACCESS_ALLOW;
       }
     }
@@ -393,7 +393,7 @@ function cu_forms_bundle_node_access($node, $op, $account) {
  * of type 'user'.
  */
 function cu_forms_bundle_field_widget_form_alter(&$element, &$form_state, $context) {
-  if ($context['field']['type'] == 'entityreference' && $context['field']['field_name'] == 'field_add_form_owner') {
+  if ($context['field']['type'] == 'entityreference' && $context['field']['field_name'] == 'field_add_form_manager') {
     if ($context['field']['settings']['target_type'] == 'user') {
       $element['target_id']['#autocomplete_path'] = 'form-users/autocomplete/' . $context['field']['field_name'] . '/node/webform';
     }
@@ -409,7 +409,7 @@ function cu_forms_bundle_form_webform_node_form_alter(&$form, &$form_state, $for
   global $user;
   // Get list of roles and then return form owner as $rid.
   $list_role = user_roles($membersonly = FALSE, $permission = NULL);
-  $rid = array_search('form_owner', $list_role);
+  $rid = array_search('form_manager', $list_role);
 
   // Current user and author of the form--if they're a match, they can edit the user entity ref field.
   $uid = $user->uid;
@@ -431,7 +431,7 @@ function form_users_autocomplete($field_name, $entity_type, $bundle_name, $strin
 
   // Get list of roles and then return form owner as $rid.
   $list_role = user_roles($membersonly = FALSE, $permission = NULL);
-  $fo_rid = array_search('form_owner', $list_role);
+  $fo_rid = array_search('form_manager', $list_role);
   $so_rid = array_search('site_owner', $list_role);
   $ad_rid = array_search('administrator', $list_role);
   $dev_rid = array_search('developer', $list_role);
