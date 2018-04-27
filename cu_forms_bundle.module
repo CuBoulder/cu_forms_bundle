@@ -80,6 +80,15 @@ function cu_forms_bundle_secure_permissions($role) {
       'delete own webform submissions',
       'edit own webform submissions',
     ),
+    'edit_only' => array(
+      'access own webform results',
+      'create webform content',
+      'delete any webform content',
+      'delete own webform content',
+      'edit any webform content',
+      'edit own webform content',
+      'edit webform components',
+    ),
     'content_editor' => array(
       'access own webform results',
       'create webform content',
