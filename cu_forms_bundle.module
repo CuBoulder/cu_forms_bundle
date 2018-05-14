@@ -509,3 +509,8 @@ function form_users_autocomplete($field_name, $entity_type, $bundle_name, $strin
 
   drupal_json_output($matches);
 }
+
+function cu_forms_bundle_form_user_external_invite_form_alter(&$form, &$form_state, &$form_id) {
+  $form_manager_role = user_role_load_by_name('form_manager');
+  $form['rid']['#options'][$form_manager_role->rid] = 'Form Manager';
+}
