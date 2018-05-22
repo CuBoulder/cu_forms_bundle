@@ -20,4 +20,22 @@ function cu_forms_bundle_update_7001() {
  */
 function cu_forms_bundle_update_7002() {
   secure_permissions_rebuild();
+  cu_core_revert_features();
+}
+
+/**
+ * Update permissions for new form owner role.
+ */
+function cu_forms_bundle_update_7003() {
+  db_update('system')
+    ->fields(array('weight' => 10))
+    ->condition('name', 'cu_forms_bundle', '=')
+    ->execute();
+}
+
+/**
+ * Update permissions for site_editor, edit_only roles.
+ */
+function cu_forms_bundle_update_7004() {
+  secure_permissions_rebuild();
 }
