@@ -1,13 +1,25 @@
 <?php
-/*
- * Implements hook_enable()
+
+/**
+ * @file
+ * Install hooks for the cu_forms_bundle module.
  */
 
+/**
+ * Implements hook_enable()
+ */
 function cu_forms_bundle_enable() {
-  //module_enable(FROM .INFO?);
+  // Add form manager role to user invite.
+  secure_permissions_build_roles();
+  $campaign_manager_role = user_role_load_by_name('form_manager');
+
+  $invite_roles = variable_get('user_external_invite_addon_roles', array());
+  $invite_roles[] = $campaign_manager_role->rid;
+
+  variable_set('user_external_invite_addon_roles', $invite_roles);
 }
 
-/*
+/**
  * Express 2.8.5 update
  * Add schema version to diff bundles.
  */
@@ -38,4 +50,18 @@ function cu_forms_bundle_update_7003() {
  */
 function cu_forms_bundle_update_7004() {
   secure_permissions_rebuild();
+}
+
+/**
+ * Add form manager role to user invite.
+ */
+function cu_forms_bundle_update_7005() {
+  // Add form manager role to user invite.
+  secure_permissions_build_roles();
+  $campaign_manager_role = user_role_load_by_name('form_manager');
+
+  $invite_roles = variable_get('user_external_invite_addon_roles', array());
+  $invite_roles[] = $campaign_manager_role->rid;
+
+  variable_set('user_external_invite_addon_roles', $invite_roles);
 }
