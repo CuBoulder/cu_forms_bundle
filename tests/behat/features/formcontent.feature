@@ -110,19 +110,7 @@ And I select "Time" from "edit-add-type"
       | content_editor |
       | site_editor    |
 
-  Scenario: Node Access -  EditOnly can edit and revise but not delete node; can clear page cache
-    Given I am logged in as a user with the "edit_only" role
-    And I am on "admin/content"
-    And I follow "My Page"
-    Then I should see the link "View"
-    And I should see the link "Edit"
-    And I should not see the link "Edit Layout"
-    And I should see the link "Revisions"
-    And I should see the link "Clear Page Cache"
-    When I follow "Edit"
-    Then I should see "This document is now locked against simultaneous editing."
-    And I should not see an "#edit-delete" element
-    And I press "Cancel edit"
+
 
 
   # 5) CHECK MORE COMPLEX NODE CREATION
