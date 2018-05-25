@@ -87,7 +87,7 @@ And I select "Textarea" from "edit-add-type"
 And I select "Textfield" from "edit-add-type"
 And I select "Time" from "edit-add-type"
 
-  # 3) CHECK EDITING AND DELETING PRIVILEGES ON THE CONTENT JUST MADE
+  # 3) CHECK EDITING AND DELETING PRIVILEGES ON THE CONTENT JUST MADE - ONLY SOME CAN EDIT
   Scenario Outline: Node Access -  Some roles can edit and delete Webform content
     Given I am logged in as a user with the <role> role
     And I am on "admin/content"
@@ -95,7 +95,7 @@ And I select "Time" from "edit-add-type"
     Then I should see the link "View"
     And I should see the link "Edit"
     And I should see the link "Edit Layout"
-    And I should see the link "Revisions"
+    And I should see the link "Webform Results"
     And I should see the link "Clear Page Cache"
     When I follow "Edit"
     Then I should see "This document is now locked against simultaneous editing."
@@ -109,6 +109,7 @@ And I select "Time" from "edit-add-type"
       | site_owner     |
       | content_editor |
       | site_editor    |
+      | form_manager   |
 
 
 
