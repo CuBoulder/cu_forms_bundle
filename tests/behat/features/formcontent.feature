@@ -57,16 +57,35 @@ Then I should see “Simple Form”
 And I should see an input field labeled “Name” with ID “edit-submitted-name”
 And I should see an input button of value “Submit”
 
-
 Scenario: The provide menu link box should be checked on node creation but remain unchecked if user chooses to uncheck that box.
 Given I am logged in as a user with the "site_owner" role
-    And I am on "admin/content"
-    And I follow "Simple Form"
-    Then the "edit-menu-enabled" checkbox should be checked
-    When I uncheck the box "edit-menu-enabled"
-    And I press the "Save" button
+And I am on "admin/content"
+And I follow "Simple Form"
+Then the "edit-menu-enabled" checkbox should be checked
+When I uncheck the box "edit-menu-enabled"
+And I press the "Save" button
     And I click "Edit"
     Then the checkbox "edit-menu-enabled" should be unchecked
+    
+Scenario: The component drop-down should be properly populated
+Given I am logged in as a user with the "site_owner" role
+And I am on "admin/content"
+And I follow "Simple Form"
+And I follow “Edit Webform”
+Then I select "Context (all)" from "edit-add-type"
+And I select “Date" from "edit-add-type"
+And I select “E-mail" from "edit-add-type"
+And I select “Fieldset" from "edit-add-type"
+And I select “File" from "edit-add-type"
+And I select “Grid" from "edit-add-type"
+And I select “Hidden" from "edit-add-type"
+And I select “Markup" from "edit-add-type"
+And I select “Number" from "edit-add-type"
+And I select “Page break" from "edit-add-type"
+And I select “Select options" from "edit-add-type"
+And I select “Textarea" from "edit-add-type"
+And I select “Textfield" from "edit-add-type"
+And I select “Time" from "edit-add-type"
 
   # 3) CHECK EDITING AND DELETING PRIVILEGES ON THE CONTENT JUST MADE
   Scenario Outline: Node Access -  Some roles can edit and delete Webform content
