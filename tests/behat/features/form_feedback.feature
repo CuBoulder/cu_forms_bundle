@@ -1,24 +1,30 @@
 @webform @feedback
-Feature: Webform Feedback form
-When I create a webform
-As an authenticated user
-A feedback form is automaticaly created
+Feature: Feedback Form places an existing Webform as a popup
+In order to create a site feedback form
+An authenticated user with the proper role
+Should be able to select a published form as the site feedback form
 
  Scenario: A site_owner should see no webforms after install on feedback form settings page
     Given I am logged in as a user with the "site_owner" role
     And am on "admin/settings/forms/feedback"
     Then I should see "There are no published webforms available"
 
- Scenario Outline: An site owner/administrator/developer should be able to access the settings feedback page
-    Given I am logged in as a user with the <role> role
-    When I am at "admin/settings/site-configuration/feedback"
-    Then I should not see <message>
-
-    Examples:
-      | role           | message         |
-      | site_owner     | "Access denied" |
-      | administrator  | "Access denied" |
-      | developer      | "Access denied" |
+#SOME ROLES CAN SELECT A FEEDBACK FORM AND SET OPTIONS FOR IT
+ @javascript
+Scenario Outline: Devs, Admins, SOs and ConMgrs can see all the options for the Feedback Form
+ Given I am logged in as a user with the <role> role
+ And am on "admin/settings/forms/feedback"
+ Then I should see "Available Webforms"
+ And I should see "Feedback Button Label"
+ And I should see "Feedback Button Color"
+ And I should see "Feedback Form Presentation"
+    
+Examples:
+    | role            | 
+    | developer       | 
+    | administrator   | 
+    | site_owner      | 
+    | configuration_manager |
 
 
 @clean_install
