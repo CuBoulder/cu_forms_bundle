@@ -11,7 +11,7 @@ Should be able to select a published form as the site feedback form
 
 #SOME ROLES CAN SELECT A FEEDBACK FORM AND SET OPTIONS FOR IT
  @javascript
-Scenario Outline: Devs, Admins, SOs and ConMgrs can see all the options for the Feedback Form
+Scenario Outline: Access - Devs, Admins, SOs and ConMgrs can see all the options for the Feedback Form
  Given I am logged in as a user with the <role> role
  And am on "admin/settings/forms/feedback"
  Then I should see "Available Webforms"
@@ -26,9 +26,27 @@ Examples:
     | site_owner      | 
     | configuration_manager |
 
+# SOME ROLES CAN NOT SELECT A FEEDBACK FORM
+
+Scenario Outline: Access - Most roles cannot access feedback form settings
+Given I am logged in as a user with the <role> role
+And am on "admin/settings/forms/feedback"
+Then I should see "Access denied"
+
+Examples:
+| role |
+| content_editor |
+| edit_my_content  | 
+| site_editor      | 
+| edit_only        | 
+| access_manager   | 
+
+Scenario: Access - An anonymous user should not be able to access feedback form settings
+ When I am on "admin/settings/forms/feedback"
+Then I should see "Access denied"
 
 @clean_install
-  Scenario: A site owner should see a webform in the feedback form list of one exists
+  Scenario: Access - A site owner should see a webform in the feedback form list of one exists
     Given I am logged in as a user with the "site_owner" role
     And am on "node/add/webform"
     And fill in "Title" with "Contact Form"
