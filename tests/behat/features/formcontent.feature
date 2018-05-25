@@ -10,21 +10,22 @@ I should be able to create, edit, and delete Webforms
   # 4) CHECK THAT DELETE BUTTON ACTUALLY WORKS
   # 5) CHECK MORE COMPLEX NODE CREATION
 
-  # 1) CHECK NODE ADD PRIVILEGES
+  # 1) CHECK NODE ADD PRIVILEGES (VERIFY WITH THE NEW ROLES)
   Scenario Outline: Node Access - Some roles can add Webform content
     Given I am logged in as a user with the <role> role
     When I go to "node/add/webform"
     Then I should see <message>
 
     Examples:
-      | role            | message             |
-      | developer       | "Create Basic page" |
-      | administrator   | "Create Basic page" |
-      | site_owner      | "Create Basic page" |
-      | content_editor  | "Create Basic page" |
-      | edit_my_content | "Access denied"     |
-      | site_editor     | "Create Basic page" |
-      | edit_only       | "Access denied"     |
+      | role            | message          |
+      | developer       | "Create Webform" |
+      | administrator   | "Create Webform" |
+      | site_owner      | "Create Webform" |
+      | content_editor  | "Create Webform" |
+      | edit_my_content | "Access denied"  |
+      | site_editor     | "Create Webform" |
+      | edit_only       | "Access denied"  |
+      | form_manager    | "Create Webform" |
 
   Scenario: Node Access -  An anonymous user cannot add Webform content
     When I am on "node/add/webform"
@@ -34,12 +35,14 @@ I should be able to create, edit, and delete Webforms
   Scenario: Node Functionality - A very basic Webform node can be created
     Given I am logged in as a user with the "site_owner" role
     And I am on "node/add/webform"
-    And fill in "edit-title" with "My Page"
+    And fill in "edit-title" with "Simple Form"
     And fill in "Body" with "Lorem ipsum dolor sit amet"
     When I press "edit-submit"
-    Then I should be on "/my-page"
-    And I should see "My Page"
-    And I should see "Lorem ipsum dolor sit amet"
+    And I should see "The new webform Simple Form has been created. Add new fields to your webform with the form below."
+    And I should see the link "Form components"
+    And I should see the link "Conditionals"
+    And I should see the link "E-mails"
+    And I should see the link "Form settings"
  
 Scenario: The provide menu link box should be checked on node creation but remain unchecked if user chooses to uncheck that box.
     Given I am logged in as a user with the "site_owner" role
