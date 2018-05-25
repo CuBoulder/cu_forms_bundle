@@ -55,7 +55,7 @@ And I follow "View”
 Then I should see "Simple Form”
 # GET THE PROPER TEXT FOR THESE NEXT TWO
 And I should see an input field labeled "Name” with ID "edit-submitted-name”
-And I should see an input button of value "Submit”
+And I should see an input button of value "Submit"
 
 Scenario: The provide menu link box should be checked on node creation but remain unchecked if user chooses to uncheck that box.
 Given I am logged in as a user with the "site_owner" role
@@ -64,8 +64,8 @@ And I follow "Simple Form"
 Then the "edit-menu-enabled" checkbox should be checked
 When I uncheck the box "edit-menu-enabled"
 And I press the "Save" button
-    And I click "Edit"
-    Then the checkbox "edit-menu-enabled" should be unchecked
+And I click "Edit"
+ Then the checkbox "edit-menu-enabled" should be unchecked
     
 Scenario: The component drop-down should be properly populated
 Given I am logged in as a user with the "site_owner" role
