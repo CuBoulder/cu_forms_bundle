@@ -1,5 +1,5 @@
- @webform
- Feature: Webform Content Type
+@webform
+Feature: Webform Content Type
 When I login to a Web Express website
 As an authenticated user
 I should be able to create, edit, and delete Webforms
@@ -11,7 +11,7 @@ I should be able to create, edit, and delete Webforms
   # 5) CHECK MORE COMPLEX NODE CREATION
 
   # 1) CHECK NODE ADD PRIVILEGES
-  Scenario Outline: Node Access - Some roles can add Basic Page content
+  Scenario Outline: Node Access - Some roles can add Webform content
     Given I am logged in as a user with the <role> role
     When I go to "node/add/page"
     Then I should see <message>
@@ -26,12 +26,12 @@ I should be able to create, edit, and delete Webforms
       | site_editor     | "Create Basic page" |
       | edit_only       | "Access denied"     |
 
-  Scenario: Node Access -  An anonymous user cannot add Basic Page content
+  Scenario: Node Access -  An anonymous user cannot add Webform content
     When I am on "node/add/page"
     Then I should see "Access denied"
   
   #  2) CHECK THAT SIMPLE NODE CAN BE CREATED
-  Scenario: Node Functionality - A very basic Basic Page node can be created
+  Scenario: Node Functionality - A very basic Webform node can be created
     Given I am logged in as a user with the "site_owner" role
     And I am on "node/add/page"
     And fill in "edit-title" with "My Page"
@@ -52,7 +52,7 @@ Scenario: The provide menu link box should be checked on node creation but remai
     Then the checkbox "edit-menu-enabled" should be unchecked
 
   # 3) CHECK EDITING AND DELETING PRIVILEGES ON THE CONTENT JUST MADE
-  Scenario Outline: Node Access -  Some roles can edit and delete Basic Page content
+  Scenario Outline: Node Access -  Some roles can edit and delete Webform content
     Given I am logged in as a user with the <role> role
     And I am on "admin/content"
     And I follow "My Page"
@@ -119,7 +119,7 @@ Scenario: The provide menu link box should be checked on node creation but remai
     And I am on "/"
 
   # 5) CHECK MORE COMPLEX NODE CREATION
-  Scenario: A graphic can be uploaded to a Basic Page node
+  Scenario: A graphic can be uploaded to a Webform content
     Given I am logged in as a user with the "site_owner" role
     And I am on "node/add/page"
     And fill in "edit-title" with "About Ralphie"
