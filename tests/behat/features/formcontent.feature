@@ -60,8 +60,8 @@ And I should see an input button of value “Submit”
 
 Scenario: The provide menu link box should be checked on node creation but remain unchecked if user chooses to uncheck that box.
 Given I am logged in as a user with the "site_owner" role
-    When I am at "node/add/webform"
-    And  I fill in "edit-title" with "Form Menu Check Box"
+    And I am on "admin/content"
+    And I follow "Simple Form"
     Then the "edit-menu-enabled" checkbox should be checked
     When I uncheck the box "edit-menu-enabled"
     And I press the "Save" button
@@ -72,7 +72,7 @@ Given I am logged in as a user with the "site_owner" role
   Scenario Outline: Node Access -  Some roles can edit and delete Webform content
     Given I am logged in as a user with the <role> role
     And I am on "admin/content"
-    And I follow "My Page"
+    And I follow "Simple Form"
     Then I should see the link "View"
     And I should see the link "Edit"
     And I should see the link "Edit Layout"
