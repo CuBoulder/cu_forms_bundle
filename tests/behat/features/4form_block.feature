@@ -4,27 +4,28 @@ When a Webform has been created
 As a user with the proper role
 I should be able to export a Webform Block
 
-# 1) TEST BLOCK ADD PRIVILEGES
+# 1) TEST BLOCK CREATION
 # 2) TEST THAT A SIMPLE BLOCK CAN BE CREATED AND REVISED
 # 3) TEST EDITING AND DELETING PRIVILEGES ON THE BLOCK JUST MADE
 # 4) TEST THAT THE DELETE BUTTON ACTUALLY WORKS
 # 5) TEST MORE COMPLEX BLOCK CREATION
 
-# 1) TEST BLOCK ADD PRIVILEGES
-Scenario Outline: Block Access: Some roles can add a Text Block block
-Given I am logged in as a user with the <role> role
-When I go to "block/add/block"
-Then I should see <message>
+# 1) TEST BLOCK CREATION
+Scenario: A Webform can be exported as a block
+Given I am logged in as a user with the "site_owner" role
+And I am on "admin/content"
+And I follow "Simple Form"
+And I follow "Edit Webform"
+And I follow "Form settings"
+And I click "Advanced settings"
+Then I should see "If enabled this webform will be available as a block."
+And the checkbox "edit-block" should not be checked
+And I check "edit-block"
+And I click "Save"
+# AND THEN I SHOULD GO HERE AND SEE THE BLOCK
 
-Examples:
- | role                  | message                  |
- | developer             | "Create Text Block block" |
-| administrator         | "Create Text Block block" |
-| site_owner            | "Create Text Block block" |
-| content_editor        | "Create Text Block block" |
-| edit_my_content       | "Access denied"           |
-| site_editor           | "Create Text Block block" |
-| edit_only             | "Access denied"            |
+
+# IF ADVANCED LAYOUT IS ENABLED, VERIFY THAT BLOCK CAN BE WRAPPED IN BLOCK WRAPPER.
 
  Scenario: Block Access: An anonymous user cannot add a Text Block block
   When I am on "block/add/block"
