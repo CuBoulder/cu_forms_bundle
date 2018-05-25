@@ -13,7 +13,7 @@ I should be able to create, edit, and delete Webforms
   # 1) CHECK NODE ADD PRIVILEGES
   Scenario Outline: Node Access - Some roles can add Webform content
     Given I am logged in as a user with the <role> role
-    When I go to "node/add/page"
+    When I go to "node/add/webform"
     Then I should see <message>
 
     Examples:
@@ -27,13 +27,13 @@ I should be able to create, edit, and delete Webforms
       | edit_only       | "Access denied"     |
 
   Scenario: Node Access -  An anonymous user cannot add Webform content
-    When I am on "node/add/page"
+    When I am on "node/add/webform"
     Then I should see "Access denied"
   
   #  2) CHECK THAT SIMPLE NODE CAN BE CREATED
   Scenario: Node Functionality - A very basic Webform node can be created
     Given I am logged in as a user with the "site_owner" role
-    And I am on "node/add/page"
+    And I am on "node/add/webform"
     And fill in "edit-title" with "My Page"
     And fill in "Body" with "Lorem ipsum dolor sit amet"
     When I press "edit-submit"
@@ -121,7 +121,7 @@ Scenario: The provide menu link box should be checked on node creation but remai
   # 5) CHECK MORE COMPLEX NODE CREATION
   Scenario: A graphic can be uploaded to a Webform content
     Given I am logged in as a user with the "site_owner" role
-    And I am on "node/add/page"
+    And I am on "node/add/webform"
     And fill in "edit-title" with "About Ralphie"
     And fill in "Body" with "Ralphie the Buffalo is the name of the live mascot of the University of Colorado Buffaloes."
     And I fill in "edit-field-photo-und-0-alt" with "Ralphie Buffalo with handlers"
@@ -137,7 +137,7 @@ Scenario: The provide menu link box should be checked on node creation but remai
 
   Scenario: The provide menu link box should be checked on node creation but remain unchecked if user chooses to uncheck that box.
     Given I am logged in as a user with the "site_owner" role
-    When I go to "node/add/page"
+    When I go to "node/add/webform"
     And I fill in "edit-title" with "Not In Menu"
     Then the "edit-menu-enabled" checkbox should be checked
     When I uncheck "edit-menu-enabled"
