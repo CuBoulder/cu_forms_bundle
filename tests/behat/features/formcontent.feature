@@ -4,34 +4,11 @@ When I login to a Web Express website
 As an authenticated user
 I should be able to create, edit, and delete Webforms
 
-Scenario: The provide menu link box should be checked on node creation but remain unchecked if user chooses to uncheck that box.
-    Given I am logged in as a user with the "site_owner" role
-    When I am at "node/add/webform"
-    And  I fill in "edit-title" with "New Webform"
-    Then the "edit-menu-enabled" checkbox should be checked
-    When I uncheck the box "edit-menu-enabled"
-    And I press the "Save" button
-    And I click "Edit"
-    Then the checkbox "edit-menu-enabled" should be unchecked
-    
-    
   # 1) CHECK NODE ADD PRIVILEGES
   # 2) CHECK THAT SIMPLE NODE CAN BE CREATED AND REVISED
   # 3) CHECK EDITING AND DELETING PRIVILEGES ON THE CONTENT JUST MADE
   # 4) CHECK THAT DELETE BUTTON ACTUALLY WORKS
   # 5) CHECK MORE COMPLEX NODE CREATION
-
-  Scenario: A site_owner can assign an author on node/%/edit
-    Given I am logged in as a user with the "site_owner" role
-    And I am on "node/add/page"
-    And I fill in "Title" with "edit_my_content Page"
-    And I fill in "Body" with "edit_my_content page content"
-    And I fill in "Authored by" with "edit_my_content"
-    And I uncheck "Generate automatic URL alias"
-    And I fill in "URL alias" with "edit-my-content-page"
-    When I press "Save"
-    Then I should see "edit_my_content Page"
-
 
   # 1) CHECK NODE ADD PRIVILEGES
   Scenario Outline: Node Access - Some roles can add Basic Page content
@@ -64,34 +41,15 @@ Scenario: The provide menu link box should be checked on node creation but remai
     And I should see "My Page"
     And I should see "Lorem ipsum dolor sit amet"
  
-  # 2.1) CHANGE AUTHOR OF THE PAGE NODE
-  @javascript
-  Scenario: Node functionality - Change Authorship of node on admin/content
-    Given I am logged in as a user with the "developer" role
-    And I am on "admin/content"
-    And I check "edit-views-bulk-operations-0"
-    And I select "Change the author of content" from "edit-operation"
-    And I press "Execute"
-    Then I should see "The username of the user to which you would like to assign ownership."
-    And I select "edit_my_content" from "edit-owner-name"
-    And I press "Next"
-    Then I should see "Are you sure you want to perform Change the author of content on the selected items"
-    And I press "Confirm"
-    Then I should see "Performed Change the author of content on 1 item"
-
-  # @todo write test for this.
-  # Scenario: Node functionality - Change Authorship of node on on node/%/edit
-
-  # 2.2) CREATE REVISION OF NODE
-  Scenario: Node functionality - Create Revision of node
-    Given I am logged in as a user with the "developer" role
-    And I am on "admin/content"
-    And I follow "My Page"
-    And I follow "Edit"
-    And fill in "Body" with "A world class university"
-    When I press "edit-submit"
-    Then I should see "Basic page My Page has been updated"
-    And I should see the link "Revisions"
+Scenario: The provide menu link box should be checked on node creation but remain unchecked if user chooses to uncheck that box.
+    Given I am logged in as a user with the "site_owner" role
+    When I am at "node/add/webform"
+    And  I fill in "edit-title" with "New Webform"
+    Then the "edit-menu-enabled" checkbox should be checked
+    When I uncheck the box "edit-menu-enabled"
+    And I press the "Save" button
+    And I click "Edit"
+    Then the checkbox "edit-menu-enabled" should be unchecked
 
   # 3) CHECK EDITING AND DELETING PRIVILEGES ON THE CONTENT JUST MADE
   Scenario Outline: Node Access -  Some roles can edit and delete Basic Page content
