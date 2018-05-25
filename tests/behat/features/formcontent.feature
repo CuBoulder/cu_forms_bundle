@@ -171,15 +171,4 @@ And I select “Time" from "edit-add-type"
     And I should see "About Ralphie"
     And I should see "Ralphie the Buffalo is the name of the live mascot of the University of Colorado Buffaloes."
 
-  Scenario: The provide menu link box should be checked on node creation but remain unchecked if user chooses to uncheck that box.
-    Given I am logged in as a user with the "site_owner" role
-    When I go to "node/add/webform"
-    And I fill in "edit-title" with "Not In Menu"
-    Then the "edit-menu-enabled" checkbox should be checked
-    When I uncheck "edit-menu-enabled"
-    And I press "Save"
-    # ADD CHECK FOR PAGE TITLE
-    Then I should see "Not In Menu"
-    And I follow "Edit"
-    Then the checkbox "edit-menu-enabled" should be unchecked
-    
+ 
