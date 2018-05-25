@@ -42,11 +42,26 @@ I should be able to create, edit, and delete Webforms
     And the URL should contain "webform/components"
     And I should see the link "Webform Results"
     And I should see the link "Form components"
+And I should see the link “Conditionals”
+And I should see the link “E-mails”
+And I should see the link “Form settings”
+And I should see “No Components, add a component below.”
+And I fill in “edit-add-name” with “Name”
+And I press “edit-add-add”
+Then I should see “Edit component: Name”
+And I press “edit-actions-submit”
+Then I should see “New component Name added.”
+And I follow “View”
+Then I should see “Simple Form”
+# GET THE PROPER TEXT FOR THESE NEXT TWO
+And I should see an input field labeled “Name” with ID “edit-submitted-name”
+And I should see an input button of value “Submit”
+
 
 Scenario: The provide menu link box should be checked on node creation but remain unchecked if user chooses to uncheck that box.
-    Given I am logged in as a user with the "site_owner" role
+Given I am logged in as a user with the "site_owner" role
     When I am at "node/add/webform"
-    And  I fill in "edit-title" with "New Webform"
+    And  I fill in "edit-title" with "Form Menu Check Box"
     Then the "edit-menu-enabled" checkbox should be checked
     When I uncheck the box "edit-menu-enabled"
     And I press the "Save" button
