@@ -1,8 +1,8 @@
 @blocks @core
-Feature: Text Block Block
-When I login to a Web Express website
-As an authenticated user
-I should be able to create, edit, and delete a text block
+Feature: Webform Blocks
+When a Webform has been created
+As a user with the proper role
+I should be able to export a Webform Block
 
 # 1) TEST BLOCK ADD PRIVILEGES
 # 2) TEST THAT A SIMPLE BLOCK CAN BE CREATED AND REVISED
