@@ -4,7 +4,7 @@ In order to create a site feedback form
 An authenticated user with the proper role
 Should be able to select a published form as the site feedback form
 
- Scenario: A site_owner should see no webforms after install on feedback form settings page
+ Scenario: Functionality - A fresh install contains no feedback forms
     Given I am logged in as a user with the "site_owner" role
     And am on "admin/settings/forms/feedback"
     Then I should see "There are no published webforms available"
@@ -25,6 +25,7 @@ Examples:
     | administrator   | 
     | site_owner      | 
     | configuration_manager |
+    | forms_manager |
 
 # SOME ROLES CAN NOT SELECT A FEEDBACK FORM
 
@@ -46,7 +47,7 @@ Scenario: Access - An anonymous user should not be able to access feedback form 
 Then I should see "Access denied"
 
 @clean_install
-  Scenario: Access - A site owner should see a webform in the feedback form list of one exists
+  Scenario: Functionality - Existing forms are available on the Feedback Form page
     Given I am logged in as a user with the "site_owner" role
     And am on "node/add/webform"
     And fill in "Title" with "Contact Form"
