@@ -47,10 +47,15 @@ Scenario: Access - An anonymous user should not be able to access feedback form 
 Then I should see "Access denied"
 
 @clean_install
-  Scenario: Functionality - Existing forms are available on the Feedback Form page
+  Scenario: Functionality - Existing forms are available on the Feedback Form page; can be set
     Given I am logged in as a user with the "site_owner" role
     And am on "node/add/webform"
-    And fill in "Title" with "Contact Form"
+    And fill in "Title" with "My Feedback Form"
     When I press the "Save" button
     And I go to "admin/settings/forms/feedback"
     Then I should not see "There are no published webforms available"
+  And I select "My Feedback Form" from "edit-cu-feedback-path"
+  And I press "Save"
+  Then I should see "Settings have been updated"
+  
+  
