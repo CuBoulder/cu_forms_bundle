@@ -1,4 +1,4 @@
-@webforms
+@webform
 Feature: Webform initialization
 When the Webform bundle in installed
 Certain functionality is initiated
