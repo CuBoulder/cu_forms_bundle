@@ -35,7 +35,7 @@ I should be able to create, edit, and delete Webforms
   Scenario: Node Functionality - A very basic Webform node can be created
     Given I am logged in as a user with the "site_owner" role
     And I am on "node/add/webform"
-    And fill in "edit-title" with "Simple Form"
+    And fill in "edit-title" with "Simple Test Form"
     And fill in "Body" with "Lorem ipsum dolor sit amet"
     When I press "edit-submit"
     And I should see "The new webform Simple Form has been created. Add new fields to your webform with the form below."
@@ -52,7 +52,7 @@ Then I should see "Edit component: Name"
 And I press "Save component"
 Then I should see "New component Name added."
 And I follow "View"
-Then I should see "Simple Form"
+Then I should see "Simple Test Form"
 # GET THE PROPER TEXT FOR THESE NEXT TWO
 And I should see an input field labeled "Name" with ID "edit-submitted-name"
 And I should see an input button of value "Submit"
@@ -60,7 +60,7 @@ And I should see an input button of value "Submit"
 Scenario: The provide menu link box should be checked on node creation but remain unchecked if user chooses to uncheck that box.
 Given I am logged in as a user with the "site_owner" role
 And I am on "admin/content"
-And I follow "Simple Form"
+And I follow "Simple Test Form"
 Then the "edit-menu-enabled" checkbox should be checked
 When I uncheck the box "edit-menu-enabled"
 And I press the "Save" button
@@ -70,7 +70,7 @@ Then the checkbox "edit-menu-enabled" should be unchecked
 Scenario: The component drop-down should be populated with all allowed options
 Given I am logged in as a user with the "site_owner" role
 And I am on "admin/content"
-And I follow "Simple Form"
+And I follow "Simple Test Form"
 And I follow "Edit Webform"
 Then I select "Context (all)" from "edit-add-type"
 And I select "Date" from "edit-add-type"
@@ -91,7 +91,7 @@ And I select "Time" from "edit-add-type"
   Scenario Outline: Node Access -  Some roles can edit and delete Webform content
     Given I am logged in as a user with the <role> role
     And I am on "admin/content"
-    And I follow "Simple Form"
+    And I follow "Simple Test Form"
     Then I should see the link "View"
     And I should see the link "Edit"
     And I should see the link "Edit Layout"
@@ -115,18 +115,5 @@ And I select "Time" from "edit-add-type"
  # 5) CHECK MORE COMPLEX NODE CREATION
   Scenario: More complex forms can be created
     Given I am logged in as a user with the "site_owner" role
-    And I am on "node/add/webform"
-    And fill in "edit-title" with "About Ralphie"
-    And fill in "Body" with "Ralphie the Buffalo is the name of the live mascot of the University of Colorado Buffaloes."
-    And I fill in "edit-field-photo-und-0-alt" with "Ralphie Buffalo with handlers"
-    And I attach the file "ralphie.jpg" to "edit-field-photo-und-0-upload"
-    And I press "edit-field-photo-und-0-upload-button"
-    Then I should see "File information"
-    And I should see "ralphie.jpg"
-    And I should see "Insert"
-    And I press "edit-submit"
-    Then I should be on "/about-ralphie"
-    And I should see "About Ralphie"
-    And I should see "Ralphie the Buffalo is the name of the live mascot of the University of Colorado Buffaloes."
-
- 
+    And I am on "admin/content"
+    And I follow "Simple Test Form"
