@@ -38,7 +38,7 @@ I should be able to create, edit, and delete Webforms
     And fill in "edit-title" with "Simple Test Form"
     And fill in "Body" with "Lorem ipsum dolor sit amet"
     When I press "edit-submit"
-    And I should see "The new webform Simple Form has been created. Add new fields to your webform with the form below."
+    And I should see "The new webform Simple Test Form has been created. Add new fields to your webform with the form below."
     And the URL should contain "webform/components"
     And I should see the link "Webform Results"
     And I should see the link "Form components"
@@ -87,7 +87,7 @@ And I select "Textarea" from "edit-add-type"
 And I select "Textfield" from "edit-add-type"
 And I select "Time" from "edit-add-type"
 
-  # 3) CHECK EDITING AND DELETING PRIVILEGES ON THE CONTENT JUST MADE - ONLY SOME CAN EDIT
+  # 3) CHECK EDITING AND DELETING PRIVILEGES ON THE CONTENT JUST MADE - ONLY SOME ACCESS EDITING FUNCTIONALITY
   Scenario Outline: Node Access -  Some roles can edit and delete Webform content
     Given I am logged in as a user with the <role> role
     And I am on "admin/content"
