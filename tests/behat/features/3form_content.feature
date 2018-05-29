@@ -113,6 +113,7 @@ And I select "Time" from "edit-add-type"
 
 
  # 5) CHECK MORE COMPLEX NODE CREATION
+ @javascript
   Scenario: More complex forms can be created
     Given I am logged in as a user with the "site_owner" role
     And I am on "admin/content"
@@ -122,3 +123,10 @@ And I select "Time" from "edit-add-type"
     And I follow "E-mails"
     And I fill in "edit-email-option-custom" with "myname@example.com"
     And I press "Add"
+    Then I should see "E-mail to address"
+    And I press "Save e-mail settings"
+    Then I should see "myname@example.com"
+    And I follow "Form settings"
+    And I fill in "Confirmation message" with "Thank you for submitting this form"
+    
+    
