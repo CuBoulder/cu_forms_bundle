@@ -46,15 +46,15 @@ And I should see the link "Conditionals"
 And I should see the link "E-mails"
 And I should see the link "Form settings"
 And I should see "No Components, add a component below."
-And I fill in "edit-add-name” with "Name"
+And I fill in "edit-add-name" with "Name"
 And I press "edit-add-add"
 Then I should see "Edit component: Name"
 And I press "edit-actions-submit"
 Then I should see "New component Name added."
-And I follow "View”
-Then I should see "Simple Form”
+And I follow "View"
+Then I should see "Simple Form"
 # GET THE PROPER TEXT FOR THESE NEXT TWO
-And I should see an input field labeled "Name” with ID "edit-submitted-name"
+And I should see an input field labeled "Name" with ID "edit-submitted-name"
 And I should see an input button of value "Submit"
 
 Scenario: The provide menu link box should be checked on node creation but remain unchecked if user chooses to uncheck that box.
@@ -65,13 +65,13 @@ Then the "edit-menu-enabled" checkbox should be checked
 When I uncheck the box "edit-menu-enabled"
 And I press the "Save" button
 And I click "Edit"
- Then the checkbox "edit-menu-enabled" should be unchecked
+Then the checkbox "edit-menu-enabled" should be unchecked
     
 Scenario: The component drop-down should be properly populated
 Given I am logged in as a user with the "site_owner" role
 And I am on "admin/content"
 And I follow "Simple Form"
-And I follow "Edit Webform”
+And I follow "Edit Webform"
 Then I select "Context (all)" from "edit-add-type"
 And I select "Date" from "edit-add-type"
 And I select "E-mail" from "edit-add-type"
