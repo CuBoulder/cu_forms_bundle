@@ -128,5 +128,9 @@ And I select "Time" from "edit-add-type"
     Then I should see "myname@example.com"
     And I follow "Form settings"
     And I fill in "Confirmation message" with "Thank you for submitting this form"
+    And I click "Advanced settings"
+    Then I should see "Available as block"
+    And I press "Save configuration"
+    Then I should see "The form settings have been updated."
     
     
