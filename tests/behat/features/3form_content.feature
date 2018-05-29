@@ -3,7 +3,7 @@ Feature: Webform Content Type
 When I login to a Web Express website
 As an authenticated user
 I should be able to create, edit, and delete Webforms
-# https://www-dev-new.colorado.edu/p162a3b923fd
+
 
   # 1) CHECK NODE ADD PRIVILEGES
   # 2) CHECK THAT SIMPLE NODE CAN BE CREATED AND REVISED
