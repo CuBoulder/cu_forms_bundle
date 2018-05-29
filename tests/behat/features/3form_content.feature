@@ -55,7 +55,7 @@ Then I should see "New component Name added."
 And I follow "View"
 Then I should see "Simple Test Form"
 # GET THE PROPER TEXT FOR THESE NEXT TWO
-And I should see an input field labeled "Name" with ID "edit-submitted-name"
+And I should see a "#edit-submitted-name" element
 And I should see an input button of value "Submit"
 
 Scenario: The provide menu link box should be checked on node creation but remain unchecked if user chooses to uncheck that box.
