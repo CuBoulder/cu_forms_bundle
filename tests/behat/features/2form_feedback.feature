@@ -4,10 +4,10 @@ In order to create a site feedback form
 An authenticated user with the proper role
 Should be able to select a published form as the site feedback form
 
- Scenario: Functionality - A fresh install contains no feedback forms
-    Given I am logged in as a user with the "site_owner" role
-    And am on "admin/settings/forms/feedback"
-    Then I should see "There are no published webforms available"
+Scenario: Functionality - A fresh install contains no feedback forms
+Given I am logged in as a user with the "site_owner" role
+And am on "admin/settings/forms/feedback"
+Then I should see "There are no published webforms available"
 
 #SOME ROLES CAN SELECT A FEEDBACK FORM AND SET OPTIONS FOR IT
  @javascript
@@ -28,7 +28,6 @@ Examples:
     | forms_manager |
 
 # SOME ROLES CAN NOT SELECT A FEEDBACK FORM
-
 Scenario Outline: Access - Most roles cannot access feedback form settings
 Given I am logged in as a user with the <role> role
 And am on "admin/settings/forms/feedback"
@@ -47,15 +46,15 @@ Scenario: Access - An anonymous user should not be able to access feedback form 
 Then I should see "Access denied"
 
 @clean_install
-  Scenario: Functionality - Existing forms are available on the Feedback Form page; can be set
-    Given I am logged in as a user with the "site_owner" role
-    And am on "node/add/webform"
-    And fill in "Title" with "My Feedback Form"
-    When I press the "Save" button
-    And I go to "admin/settings/forms/feedback"
-    Then I should not see "There are no published webforms available"
-  And I select "My Feedback Form" from "edit-cu-feedback-path"
-  And I press "Save"
-  Then I should see "Settings have been updated"
+Scenario: Functionality - Existing forms are available on the Feedback Form page; can be set
+Given I am logged in as a user with the "site_owner" role
+And am on "node/add/webform"
+And fill in "Title" with "My Feedback Form"
+When I press the "Save" button
+And I go to "admin/settings/forms/feedback"
+Then I should not see "There are no published webforms available"
+And I select "My Feedback Form" from "edit-cu-feedback-path"
+And I press "Save"
+Then I should see "Settings have been updated"
   
   
