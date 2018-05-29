@@ -67,7 +67,7 @@ And I press the "Save" button
 And I click "Edit"
 Then the checkbox "edit-menu-enabled" should be unchecked
     
-Scenario: The component drop-down should be properly populated
+Scenario: The component drop-down should be populated with all allowed options
 Given I am logged in as a user with the "site_owner" role
 And I am on "admin/content"
 And I follow "Simple Form"
