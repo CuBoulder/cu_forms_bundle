@@ -54,7 +54,6 @@ And I press "Save component"
 Then I should see "New component Name added."
 And I follow "View"
 Then I should see "Simple Test Form"
-# GET THE PROPER TEXT FOR THESE NEXT TWO
 And I should see a "#edit-submitted-name" element
 And I should see an input button of value "Submit"
 
