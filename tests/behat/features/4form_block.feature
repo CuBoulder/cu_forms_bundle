@@ -1,4 +1,4 @@
-@blocks @core
+@webform
 Feature: Webform Blocks
 When a Webform has been created
 As a user with the proper role
