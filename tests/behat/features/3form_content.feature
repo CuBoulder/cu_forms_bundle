@@ -49,7 +49,7 @@ And I should see "No Components, add a component below."
 And I fill in "edit-add-name" with "Name"
 And I press "edit-add-add"
 Then I should see "Edit component: Name"
-And I press "edit-actions-submit"
+And I press "Save component"
 Then I should see "New component Name added."
 And I follow "View"
 Then I should see "Simple Form"
@@ -112,10 +112,8 @@ And I select "Time" from "edit-add-type"
       | form_manager   |
 
 
-
-
-  # 5) CHECK MORE COMPLEX NODE CREATION
-  Scenario: A graphic can be uploaded to a Webform content
+ # 5) CHECK MORE COMPLEX NODE CREATION
+  Scenario: More complex forms can be created
     Given I am logged in as a user with the "site_owner" role
     And I am on "node/add/webform"
     And fill in "edit-title" with "About Ralphie"
