@@ -37,7 +37,8 @@ install:
   - export BUNDLE_NAME="cu_alumni_class_notes_bundle"
   - export ADD_MODULES=""
   - export EXPRESS_JS_BEHAT_TAGS="~@exclude_all_bundles&&~@broken&&~@bundle_conflict&&@javascript"
-  - export EXPRESS_HEADLESS_BEHAT_TAGS="~@exclude_all_bundles&&~@broken&&~@javascript"
+#   - export EXPRESS_HEADLESS_BEHAT_TAGS="~@exclude_all_bundles&&~@broken&&~@javascript"
+  - export EXPRESS_HEADLESS_BEHAT_TAGS="@webform"
   - export BUNDLE_BEHAT_TAGS="~@exclude_all_bundles&&~@broken"
 
   # Clone Express and copy setup scripts to root directory.
