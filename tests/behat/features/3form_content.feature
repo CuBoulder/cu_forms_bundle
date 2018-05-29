@@ -117,3 +117,7 @@ And I select "Time" from "edit-add-type"
     Given I am logged in as a user with the "site_owner" role
     And I am on "admin/content"
     And I follow "Simple Test Form"
+    And I follow "Conditionals"
+    Then I should see "There are no conditional actions on this form"
+    And I follow "E-mails"
+    And I fill in "" with "myname@example.com"
