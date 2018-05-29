@@ -14,7 +14,7 @@ I should be able to export a Webform Block
 Scenario: A Webform can be exported as a block
 Given I am logged in as a user with the "site_owner" role
 And I am on "admin/content"
-And I follow "Simple Form"
+And I follow "Simple Test Form"
 And I follow "Edit Webform"
 And I follow "Form settings"
 And I click "Advanced settings"
@@ -22,6 +22,7 @@ Then I should see "If enabled this webform will be available as a block."
 And the checkbox "edit-block" should not be checked
 And I check "edit-block"
 And I click "Save"
+Then I should see "The form settings have been updated."
 # AND THEN I SHOULD GO HERE AND SEE THE BLOCK
 
 
