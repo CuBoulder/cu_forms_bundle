@@ -112,7 +112,7 @@ And I select "Time" from "edit-add-type"
       | form_manager   |
 
 
- # 5) CHECK MORE COMPLEX NODE CREATION
+ # 4) CHECK MORE COMPLEX NODE CREATION
  @javascript
   Scenario: More complex forms can be created
     Given I am logged in as a user with the "site_owner" role
@@ -133,4 +133,13 @@ And I select "Time" from "edit-add-type"
     And I press "Save configuration"
     Then I should see "The form settings have been updated."
     
-    
+# 5) CHECK WEBFORM RESULTS
+  Scenario: Submitting a form creates results
+    Given I am logged in as a user with the "site_owner" role
+    And I am on "admin/content"   
+    And I follow "Simple Test Form"
+    And I fill in "Name" with "Englebert Humperdink"
+    And I press "Submit"
+    Then I should see "Thank you for submitting this form"
+    And I follow "Go back to the form"
+    And I follow "Webform results"
