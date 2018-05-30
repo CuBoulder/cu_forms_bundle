@@ -1,7 +1,7 @@
 @webform
 Feature: Webform initialization
-When the Webform bundle in installed
-Certain functionality is initiated
+When the Webform bundle is installed
+Certain webform functionality is instantiated throughout site
 
 # 1. Form Manager permissions are added to admin/people/invite
 # 2. The webform tab appears in admin/content; is properly populated
