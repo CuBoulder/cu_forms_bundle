@@ -34,7 +34,7 @@ install:
   - cd $TRAVIS_BUILD_DIR && cd ../ && export ROOT_DIR=$(pwd)
   - export HOME
   - export TRAVIS_EVENT_TYPE
-  - export BUNDLE_NAME="cu_alumni_class_notes_bundle"
+  - export BUNDLE_NAME="cu_forms_bundle"
   - export ADD_MODULES=""
   - export EXPRESS_JS_BEHAT_TAGS="~@exclude_all_bundles&&~@broken&&~@bundle_conflict&&@javascript"
 #   - export EXPRESS_HEADLESS_BEHAT_TAGS="~@exclude_all_bundles&&~@broken&&~@javascript"
