@@ -72,6 +72,7 @@ function cu_forms_bundle_secure_permissions($role) {
       'edit own webform content',
       'edit own webform submissions',
       'edit webform components',
+      'view unused forms',
     ),
     'site_owner' => array(
       'access all webform results',
@@ -88,6 +89,7 @@ function cu_forms_bundle_secure_permissions($role) {
       'edit own webform content',
       'edit own webform submissions',
       'edit webform components',
+      'view unused forms',
     ),
     'administrator' => array(
       'access all webform results',
@@ -104,6 +106,7 @@ function cu_forms_bundle_secure_permissions($role) {
       'edit own webform content',
       'edit own webform submissions',
       'edit webform components',
+      'view unused forms',
     ),
     'developer' => array(
       'access all webform results',
@@ -120,6 +123,7 @@ function cu_forms_bundle_secure_permissions($role) {
       'edit own webform content',
       'edit own webform submissions',
       'edit webform components',
+      'view unused forms',
     ),
   );
   if (isset($permissions[$role])) {
