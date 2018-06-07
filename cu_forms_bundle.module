@@ -62,6 +62,7 @@ function cu_forms_bundle_secure_permissions($role) {
     'authenticated user' => array(
       'delete own webform submissions',
       'edit own webform submissions',
+      'edit webform components'
     ),
     'form_manager' => array(
       'access own webform results',
