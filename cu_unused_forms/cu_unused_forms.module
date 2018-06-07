@@ -67,8 +67,7 @@ function cu_unused_forms_list() {
       $output['all_forms'][$node->nid]['#markup'] = '<li><a href="' . $base_url . '/node/' . $node->nid . '">' . $node->title . '</a></li>';
     }
   }
-  dpm($nodes);
-
+  
   // Return all submission nids (webform_submissions) to $sub_nids.
   foreach ($forms_submissions as $sub) {
     $sub_nids[] = $sub->nid;
