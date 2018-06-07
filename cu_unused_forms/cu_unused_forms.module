@@ -51,10 +51,15 @@ function cu_unused_forms_list() {
   foreach ($forms_count as $form) {
     $form_nids[] = $form->nid;
   }
-
-  $output['all_forms_title']['#markup'] = '<h3>' . count($form_nids) . t(' disabled form(s)') . '</h3>';
   // Load all the webform nids to use later on.
   $nodes = node_load_multiple($form_nids);
+
+  foreach ($nodes as $node) {
+    if ($node->webform['status'] == 0) {
+      $disabled_count[] = $node;
+    }
+  }
+  $output['all_forms_title']['#markup'] = '<h3>' . count($disabled_count) . t(' disabled form(s)') . '</h3>';
 
   // If the form's node record is set to disabled, return them under the disabled section.
   foreach ($nodes as $node) {
@@ -62,6 +67,7 @@ function cu_unused_forms_list() {
       $output['all_forms'][$node->nid]['#markup'] = '<li><a href="' . $base_url . '/node/' . $node->nid . '">' . $node->title . '</a></li>';
     }
   }
+  dpm($nodes);
 
   // Return all submission nids (webform_submissions) to $sub_nids.
   foreach ($forms_submissions as $sub) {
@@ -91,9 +97,7 @@ function cu_unused_forms_list() {
     // Load all the webform nids to use later on.
     $nodes = node_load_multiple($nids);
     foreach ($nodes as $node) {
-      if ($node->webform['status'] == 0) {
-        $output['content'][$node->nid]['#markup'] = '<li><a href="' . $base_url . '/node/' . $node->nid . '">' . $node->title . '</a></li>';
-      }
+      $output['content'][$node->nid]['#markup'] = '<li><a href="' . $base_url . '/node/' . $node->nid . '">' . $node->title . '</a></li>';
     }
   }
   else {
