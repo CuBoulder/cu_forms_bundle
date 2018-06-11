@@ -74,6 +74,7 @@ function cu_forms_bundle_secure_permissions($role) {
       'edit any webform content',
       'edit own webform content',
       'edit own webform submissions',
+      'edit users with role content_editor',
       'edit webform components',
       'view unused forms',
     ),
