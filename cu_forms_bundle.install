@@ -88,5 +88,5 @@ function cu_forms_bundle_update_7006() {
  * Enable cu_unused_forms.
  */
 function cu_forms_bundle_update_7007() {
-  module_enable('cu_unused_forms', TRUE);
+  module_enable(array('cu_unused_forms'));
 }
