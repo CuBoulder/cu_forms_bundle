@@ -44,9 +44,22 @@ function cu_webform_menu_alter(&$items) {
   $items['node/%webform_menu/webform-results']['title'] = 'Webform Results';
 }
 
-
+/**
+ * Implements hook_inactive_users().
+ *
+ * Counts webform submission users as active.
+ */
 function cu_webform_inactive_users(&$vars) {
   $vars['webform_submissions'] = array('table' => 'webform_submissions', 'column' => 'uid');
 
   return $vars;
+}
+
+/**
+ * Implements hook_form_alter().
+ *
+ * Alter permission to give more access options for the block field in forms.
+ */
+function cu_webform_form_webform_configure_form_alter(&$form, &$form_state, $form_id) {
+  $form['advanced']['block']['#access'] = (user_access('administer blocks') || user_access('administer site configuration') || user_access('use panels dashboard')|| user_access('edit webform components'));
 }

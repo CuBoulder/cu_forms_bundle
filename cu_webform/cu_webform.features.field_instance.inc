@@ -33,7 +33,7 @@ function cu_webform_field_default_field_instances() {
     'entity_type' => 'node',
     'fences_wrapper' => 'div_div_div',
     'field_name' => 'field_webform_results_access',
-    'label' => 'Allow the following users to view submissions',
+    'label' => 'Allow the following user(s) to view form submissions.',
     'required' => 0,
     'settings' => array(
       'user_register_form' => FALSE,
@@ -52,7 +52,7 @@ function cu_webform_field_default_field_instances() {
   );
   // Translatables
   // Included for use with string extractors like potx.
-  t('Allow the following users to view submissions');
+  t('Add Submission Manager');
 
   // Exported field_instance: 'node-webform-field_add_form_manager'.
   $field_instances['node-webform-field_add_form_manager'] = array(
@@ -77,7 +77,7 @@ function cu_webform_field_default_field_instances() {
     'entity_type' => 'node',
     'fences_wrapper' => 'div_div_div',
     'field_name' => 'field_add_form_manager',
-    'label' => 'Add Form Owner',
+    'label' => 'Allow the following user(s) to edit the form.',
     'required' => 0,
     'settings' => array(
       'user_register_form' => FALSE,
@@ -97,7 +97,7 @@ function cu_webform_field_default_field_instances() {
 
   // Translatables
   // Included for use with string extractors like potx.
-  t('Add Form Owner');
+  t('Allow the following user(s) to edit the form.');
 
   return $field_instances;
 }
