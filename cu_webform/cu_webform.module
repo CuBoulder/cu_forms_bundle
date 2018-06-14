@@ -43,3 +43,10 @@ function cu_webform_menu_alter(&$items) {
   $items['node/%webform_menu/webform']['title'] = 'Edit Webform';
   $items['node/%webform_menu/webform-results']['title'] = 'Webform Results';
 }
+
+
+function cu_webform_inactive_users(&$vars) {
+  $vars['webform_submissions'] = array('table' => 'webform_submissions', 'column' => 'uid');
+
+  return $vars;
+}
