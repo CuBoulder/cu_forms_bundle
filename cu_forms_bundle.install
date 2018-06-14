@@ -71,15 +71,16 @@ function cu_forms_bundle_update_7005() {
  */
 function cu_forms_bundle_update_7006() {
   secure_permissions_rebuild();
-
-  $uids = db_query("SELECT uid FROM {node} n WHERE n.type = 'webform'")->fetchCol();
+  $fm_role = user_role_load_by_name("form_manager");
+  $uids = db_query("SELECT DISTINCT uid FROM {node} n WHERE n.type = 'webform'")->fetchCol();
 
   foreach ($uids as $uid) {
     $user = user_load($uid);
-    $fm_role = user_role_load_by_name("form_manager");
-    if (!in_array('developer', array_values($user->roles)) && !in_array('administrator', array_values($user->roles)) && !in_array('site_owner', array_values($user->roles))) {
-      user_multiple_role_edit(array($uid), 'add_role',   $fm_role->rid);
-      watchdog('cu_forms_bundle', ':user has been given the form manager role.', [':user' => $user->name]);
+    if (isset($user->uid) && $user->uid) {
+      if (!in_array('developer', array_values($user->roles)) && !in_array('administrator', array_values($user->roles)) && !in_array('site_owner', array_values($user->roles))) {
+        user_multiple_role_edit(array($uid), 'add_role', $fm_role->rid);
+        watchdog('cu_forms_bundle', ':user has been given the form manager role.', [':user' => $user->name]);
+      }
     }
   }
 }
