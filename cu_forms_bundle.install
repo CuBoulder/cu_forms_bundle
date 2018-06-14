@@ -16,7 +16,7 @@ function cu_forms_bundle_enable() {
   $invite_roles = variable_get('user_external_invite_addon_roles', array());
   $invite_roles[] = $campaign_manager_role->rid;
 
-  variabgit statusle_set('user_external_invite_addon_roles', $invite_roles);
+  variable_set('user_external_invite_addon_roles', $invite_roles);
 }
 
 /**
