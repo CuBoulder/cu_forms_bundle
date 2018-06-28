@@ -91,3 +91,14 @@ function cu_forms_bundle_update_7006() {
 function cu_forms_bundle_update_7007() {
   module_enable(array('cu_unused_forms'));
 }
+
+/**
+ * This update hook is used to revert the cu_webform feature
+ * Running this should fix the display order in which the fields for adding 
+ * form editor/submission viewers are displayed when adding/editing a webform.
+ */
+function cu_forms_bundle_update_7008()
+{
+  $features = array('cu_webform' => 'cu_webform');
+  cu_core_revert_features($features);
+}
