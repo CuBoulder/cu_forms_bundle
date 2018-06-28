@@ -435,6 +435,11 @@ function cu_forms_bundle_form_webform_node_form_alter(&$form, &$form_state, $for
     if (!is_numeric($delta)) { continue; }
     $form[$sub_field_name]['und'][$delta]['target_id']['#autocomplete_path'] = 'cu-forms-bundle/autocomplete';
   }
+
+  $form['title']['#weight'] = 30;
+  $form['body']['#weight'] = 31;
+  $form['field_webform_results_access']['#weight'] = 32;
+  $form['field_add_form_manager']['#weight'] = 33;
 }
 
 /**
