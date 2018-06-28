@@ -436,6 +436,8 @@ function cu_forms_bundle_form_webform_node_form_alter(&$form, &$form_state, $for
     $form[$sub_field_name]['und'][$delta]['target_id']['#autocomplete_path'] = 'cu-forms-bundle/autocomplete';
   }
 
+  // The last two fields match the weights in cu_webform.features.field_instance.inc.
+  // @see https://github.com/CuBoulder/express/issues/2617.
   $form['title']['#weight'] = 30;
   $form['body']['#weight'] = 31;
   $form['field_webform_results_access']['#weight'] = 32;
