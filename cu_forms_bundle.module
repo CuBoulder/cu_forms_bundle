@@ -435,6 +435,12 @@ function cu_forms_bundle_form_webform_node_form_alter(&$form, &$form_state, $for
     if (!is_numeric($delta)) { continue; }
     $form[$sub_field_name]['und'][$delta]['target_id']['#autocomplete_path'] = 'cu-forms-bundle/autocomplete';
   }
+
+  // Those fields were showing up above the body field.
+  // @see https://github.com/CuBoulder/express/issues/2617.
+  $body_weight = (int) $form['body']['#weight'];
+  $form['field_webform_results_access']['#weight'] = $body_weight + 1;
+  $form['field_add_form_manager']['#weight'] = $body_weight + 2;
 }
 
 /**
