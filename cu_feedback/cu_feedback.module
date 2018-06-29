@@ -163,11 +163,8 @@ function cu_feedback_preprocess_html(&$variables) {
     $link_class[] = 'cu-feedback-link';
     $link_class[] = 'cu-feedback-link-' . $color;
     $link_class[] = $embed === 'embed' ? 'cu-feedback-link-embed' : '';
-    if ($embed) {
-      $link = l('<i class="fa fa-chevron-up"></i> ' . check_plain($label), $path, array('html' => TRUE, 'attributes' => array('class' => $link_class, 'onclick' => 'cu_feedback_ajax_load()')));
-    } else {
-      $link = l('<i class="fa fa-chevron-up"></i> ' . check_plain($label), $path, array('html' => TRUE, 'attributes' => array('class' => $link_class)));
-    }
+    $link = l('<i class="fa fa-chevron-up"></i> ' . check_plain($label), $path, array('html' => TRUE, 'attributes' => array('class' => $link_class)));
+
     $variables['page']['page_bottom']['cu_feedback']['#markup'] = '<div id="cu-feedback">' . $link;
     if ($embed) {
       $node_content = node_view(node_load($nid));
