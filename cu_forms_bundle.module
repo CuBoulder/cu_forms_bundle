@@ -486,6 +486,4 @@ function cu_forms_bundle_views_pre_render(&$view) {
     $new_haystack = str_replace($needle, '', $haystack);
     $view->filter['type']->view->exposed_widgets = $new_haystack;
   }
-
-  dpm($view->query, 'Filter View: ');
 }
