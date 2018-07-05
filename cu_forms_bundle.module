@@ -472,15 +472,20 @@ function cu_forms_bundle_form_user_external_invite_form_alter(&$form, &$form_sta
   $form['rid']['#options'][$form_manager_role->rid] = 'Form Manager';
 }
 
+/**
+ * Implements hook_views_pre_render().
+ *
+ * Override the webform content type on the main content admin page.
+ */
 function cu_forms_bundle_views_pre_render(&$view) {
   $view->name; //checks for view machine name
 
   if ($view->name === 'cu_content_administration_override_view') {
     $needle = '<option value="webform">Webform</option>';
     $haystack = $view->filter['type']->view->exposed_widgets;
-
     $new_haystack = str_replace($needle, '', $haystack);
-
     $view->filter['type']->view->exposed_widgets = $new_haystack;
   }
+
+  dpm($view->query, 'Filter View: ');
 }
