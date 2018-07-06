@@ -63,3 +63,10 @@ function cu_webform_inactive_users(&$vars) {
 function cu_webform_form_webform_configure_form_alter(&$form, &$form_state, $form_id) {
   $form['advanced']['block']['#access'] = (user_access('administer blocks') || user_access('administer site configuration') || user_access('use panels dashboard')|| user_access('edit webform components'));
 }
+
+/**
+ * Implements hook_views_api().
+ */
+function cu_webform_views_api() {
+  return array('api' => 3.0);
+}
