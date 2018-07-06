@@ -31,6 +31,80 @@ function cu_webform_views_default_views() {
   $handler->display->display_options['pager']['type'] = 'full';
   $handler->display->display_options['pager']['options']['items_per_page'] = '25';
   $handler->display->display_options['style_plugin'] = 'table';
+  $handler->display->display_options['style_options']['columns'] = array(
+    'views_bulk_operations' => 'views_bulk_operations',
+    'title' => 'title',
+    'status' => 'status',
+    'status_1' => 'status_1',
+    'name' => 'name',
+    'field_ldap_last_name' => 'field_ldap_last_name',
+    'webform_results' => 'webform_results',
+    'webform_submission_count_node' => 'webform_submission_count_node',
+    'webform_edit' => 'webform_edit',
+  );
+  $handler->display->display_options['style_options']['default'] = '-1';
+  $handler->display->display_options['style_options']['info'] = array(
+    'views_bulk_operations' => array(
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'title' => array(
+      'sortable' => 1,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'status' => array(
+      'sortable' => 1,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'status_1' => array(
+      'sortable' => 1,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'name' => array(
+      'sortable' => 0,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'field_ldap_last_name' => array(
+      'sortable' => 1,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'webform_results' => array(
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'webform_submission_count_node' => array(
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'webform_edit' => array(
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+  );
+  /* Relationship: Content: Author */
+  $handler->display->display_options['relationships']['uid']['id'] = 'uid';
+  $handler->display->display_options['relationships']['uid']['table'] = 'node';
+  $handler->display->display_options['relationships']['uid']['field'] = 'uid';
+  $handler->display->display_options['relationships']['uid']['required'] = TRUE;
   /* Field: Bulk operations: Content */
   $handler->display->display_options['fields']['views_bulk_operations']['id'] = 'views_bulk_operations';
   $handler->display->display_options['fields']['views_bulk_operations']['table'] = 'views_entity_node';
@@ -107,6 +181,27 @@ function cu_webform_views_default_views() {
   $handler->display->display_options['fields']['status_1']['table'] = 'node';
   $handler->display->display_options['fields']['status_1']['field'] = 'status';
   $handler->display->display_options['fields']['status_1']['not'] = 0;
+  /* Field: User: Name */
+  $handler->display->display_options['fields']['name']['id'] = 'name';
+  $handler->display->display_options['fields']['name']['table'] = 'users';
+  $handler->display->display_options['fields']['name']['field'] = 'name';
+  $handler->display->display_options['fields']['name']['relationship'] = 'uid';
+  $handler->display->display_options['fields']['name']['exclude'] = TRUE;
+  $handler->display->display_options['fields']['name']['alter']['text'] = '[realname]';
+  $handler->display->display_options['fields']['name']['hide_alter_empty'] = FALSE;
+  /* Field: User: Last Name */
+  $handler->display->display_options['fields']['field_ldap_last_name']['id'] = 'field_ldap_last_name';
+  $handler->display->display_options['fields']['field_ldap_last_name']['table'] = 'field_data_field_ldap_last_name';
+  $handler->display->display_options['fields']['field_ldap_last_name']['field'] = 'field_ldap_last_name';
+  $handler->display->display_options['fields']['field_ldap_last_name']['relationship'] = 'uid';
+  $handler->display->display_options['fields']['field_ldap_last_name']['label'] = 'Author';
+  $handler->display->display_options['fields']['field_ldap_last_name']['alter']['alter_text'] = TRUE;
+  $handler->display->display_options['fields']['field_ldap_last_name']['alter']['text'] = '[name]';
+  $handler->display->display_options['fields']['field_ldap_last_name']['element_type'] = '0';
+  $handler->display->display_options['fields']['field_ldap_last_name']['element_wrapper_type'] = '0';
+  $handler->display->display_options['fields']['field_ldap_last_name']['element_default_classes'] = FALSE;
+  $handler->display->display_options['fields']['field_ldap_last_name']['hide_alter_empty'] = FALSE;
+  $handler->display->display_options['fields']['field_ldap_last_name']['field_api_classes'] = TRUE;
   /* Field: Webform: Webform results link */
   $handler->display->display_options['fields']['webform_results']['id'] = 'webform_results';
   $handler->display->display_options['fields']['webform_results']['table'] = 'node';
@@ -190,7 +285,6 @@ function cu_webform_views_default_views() {
   $handler->display->display_options['menu']['name'] = 'management';
   $handler->display->display_options['menu']['context'] = 0;
   $handler->display->display_options['menu']['context_only_inline'] = 0;
-
 
   $export['cu_webform_administration'] = $view;
 
