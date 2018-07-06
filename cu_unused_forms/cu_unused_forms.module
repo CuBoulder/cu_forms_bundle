@@ -48,12 +48,13 @@ function cu_unused_forms_list() {
   $forms_submissions = $forms_submissions_query->fetchAll();
 
   // Return all form nids (webform) to $form_nids.
+  $form_nids = array();
   foreach ($forms_count as $form) {
     $form_nids[] = $form->nid;
   }
   // Load all the webform nids to use later on.
   $nodes = node_load_multiple($form_nids);
-
+  $disabled_count = null;
   foreach ($nodes as $node) {
     if ($node->webform['status'] == 0) {
       $disabled_count[] = $node;
@@ -69,6 +70,7 @@ function cu_unused_forms_list() {
   }
 
   // Return all submission nids (webform_submissions) to $sub_nids.
+  $sub_nids = array();
   foreach ($forms_submissions as $sub) {
     $sub_nids[] = $sub->nid;
   }
@@ -84,6 +86,7 @@ function cu_unused_forms_list() {
 
   // This could be helpful at some point, right?
   variable_set('cu_unused_forms_count', count($no_subs));
+
 
   $output['top_title']['#markup'] = '<br><h3>' . count($no_subs) . t(' unused form(s)') . '</h3>';
 
