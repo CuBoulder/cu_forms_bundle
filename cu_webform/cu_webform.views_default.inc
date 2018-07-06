@@ -102,10 +102,11 @@ function cu_webform_views_default_views() {
   $handler->display->display_options['fields']['status']['table'] = 'webform';
   $handler->display->display_options['fields']['status']['field'] = 'status';
   $handler->display->display_options['fields']['status']['not'] = 0;
-  /* Field: Webform: Webform form body */
-  $handler->display->display_options['fields']['webform_form_body']['id'] = 'webform_form_body';
-  $handler->display->display_options['fields']['webform_form_body']['table'] = 'node';
-  $handler->display->display_options['fields']['webform_form_body']['field'] = 'webform_form_body';
+  /* Field: Content: Published */
+  $handler->display->display_options['fields']['status_1']['id'] = 'status_1';
+  $handler->display->display_options['fields']['status_1']['table'] = 'node';
+  $handler->display->display_options['fields']['status_1']['field'] = 'status';
+  $handler->display->display_options['fields']['status_1']['not'] = 0;
   /* Field: Webform: Webform results link */
   $handler->display->display_options['fields']['webform_results']['id'] = 'webform_results';
   $handler->display->display_options['fields']['webform_results']['table'] = 'node';
@@ -189,6 +190,7 @@ function cu_webform_views_default_views() {
   $handler->display->display_options['menu']['name'] = 'management';
   $handler->display->display_options['menu']['context'] = 0;
   $handler->display->display_options['menu']['context_only_inline'] = 0;
+
 
   $export['cu_webform_administration'] = $view;
 
