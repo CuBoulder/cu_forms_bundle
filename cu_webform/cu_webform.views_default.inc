@@ -190,12 +190,13 @@ function cu_webform_views_default_views() {
   $handler->display->display_options['fields']['name']['exclude'] = TRUE;
   $handler->display->display_options['fields']['name']['alter']['text'] = '[realname]';
   $handler->display->display_options['fields']['name']['hide_alter_empty'] = FALSE;
+  $handler->display->display_options['fields']['name']['link_to_user'] = FALSE;
   /* Field: User: Last Name */
   $handler->display->display_options['fields']['field_ldap_last_name']['id'] = 'field_ldap_last_name';
   $handler->display->display_options['fields']['field_ldap_last_name']['table'] = 'field_data_field_ldap_last_name';
   $handler->display->display_options['fields']['field_ldap_last_name']['field'] = 'field_ldap_last_name';
   $handler->display->display_options['fields']['field_ldap_last_name']['relationship'] = 'uid';
-  $handler->display->display_options['fields']['field_ldap_last_name']['label'] = 'Author';
+  $handler->display->display_options['fields']['field_ldap_last_name']['label'] = 'Owner';
   $handler->display->display_options['fields']['field_ldap_last_name']['alter']['alter_text'] = TRUE;
   $handler->display->display_options['fields']['field_ldap_last_name']['alter']['text'] = '[name]';
   $handler->display->display_options['fields']['field_ldap_last_name']['element_type'] = '0';
@@ -207,7 +208,7 @@ function cu_webform_views_default_views() {
   $handler->display->display_options['fields']['field_add_form_manager']['id'] = 'field_add_form_manager';
   $handler->display->display_options['fields']['field_add_form_manager']['table'] = 'field_data_field_add_form_manager';
   $handler->display->display_options['fields']['field_add_form_manager']['field'] = 'field_add_form_manager';
-  $handler->display->display_options['fields']['field_add_form_manager']['label'] = 'The following user(s) can edit';
+  $handler->display->display_options['fields']['field_add_form_manager']['label'] = 'Additional Owners';
   $handler->display->display_options['fields']['field_add_form_manager']['element_type'] = '0';
   $handler->display->display_options['fields']['field_add_form_manager']['element_wrapper_type'] = '0';
   $handler->display->display_options['fields']['field_add_form_manager']['element_default_classes'] = FALSE;
@@ -221,7 +222,7 @@ function cu_webform_views_default_views() {
   $handler->display->display_options['fields']['field_webform_results_access']['id'] = 'field_webform_results_access';
   $handler->display->display_options['fields']['field_webform_results_access']['table'] = 'field_data_field_webform_results_access';
   $handler->display->display_options['fields']['field_webform_results_access']['field'] = 'field_webform_results_access';
-  $handler->display->display_options['fields']['field_webform_results_access']['label'] = 'The following user(s) can view submissions';
+  $handler->display->display_options['fields']['field_webform_results_access']['label'] = 'Access to Submissions';
   $handler->display->display_options['fields']['field_webform_results_access']['element_type'] = '0';
   $handler->display->display_options['fields']['field_webform_results_access']['element_wrapper_type'] = '0';
   $handler->display->display_options['fields']['field_webform_results_access']['element_default_classes'] = FALSE;
@@ -235,14 +236,16 @@ function cu_webform_views_default_views() {
   $handler->display->display_options['fields']['webform_submission_count_node']['id'] = 'webform_submission_count_node';
   $handler->display->display_options['fields']['webform_submission_count_node']['table'] = 'node';
   $handler->display->display_options['fields']['webform_submission_count_node']['field'] = 'webform_submission_count_node';
-  /* Field: Webform: Webform results link */
-  $handler->display->display_options['fields']['webform_results']['id'] = 'webform_results';
-  $handler->display->display_options['fields']['webform_results']['table'] = 'node';
-  $handler->display->display_options['fields']['webform_results']['field'] = 'webform_results';
-  /* Field: Webform: Webform edit link */
-  $handler->display->display_options['fields']['webform_edit']['id'] = 'webform_edit';
-  $handler->display->display_options['fields']['webform_edit']['table'] = 'node';
-  $handler->display->display_options['fields']['webform_edit']['field'] = 'webform_edit';
+  $handler->display->display_options['fields']['webform_submission_count_node']['label'] = 'Submissions';
+  $handler->display->display_options['fields']['webform_submission_count_node']['alter']['text'] = 'Results: [webform_submission_count_node]';
+  /* Field: Content: Nid */
+  $handler->display->display_options['fields']['nid']['id'] = 'nid';
+  $handler->display->display_options['fields']['nid']['table'] = 'node';
+  $handler->display->display_options['fields']['nid']['field'] = 'nid';
+  $handler->display->display_options['fields']['nid']['label'] = 'Operations';
+  $handler->display->display_options['fields']['nid']['alter']['alter_text'] = TRUE;
+  $handler->display->display_options['fields']['nid']['alter']['text'] = '<a href="../../node/[nid]/webform-results">Results</a>|<a href="../../node/[nid]/webform">Edit</a>';
+  $handler->display->display_options['fields']['nid']['element_label_colon'] = FALSE;
   /* Sort criterion: Content: Post date */
   $handler->display->display_options['sorts']['created']['id'] = 'created';
   $handler->display->display_options['sorts']['created']['table'] = 'node';
