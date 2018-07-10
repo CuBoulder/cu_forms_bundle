@@ -487,3 +487,37 @@ function cu_forms_bundle_views_pre_render(&$view) {
     $view->filter['type']->view->exposed_widgets = $new_haystack;
   }
 }
+
+
+/**
+ * Implements hook_atlas_statistics().
+ * IMPORTANT! If you are using a Boolean type for a field in Atlas, you need to
+ * return FALSE rather than a null value.
+ */
+function cu_forms_bundle_atlas_statistics() {
+  $statistics_data = array();
+
+  $webform_stats = array(
+    'total_submissions' => 0,
+    'active_forms' => 0,
+    'inactive_forms' => 0,
+  );
+  // Load all webforms.
+  $webforms = node_load_multiple(array(), array(
+    'type' => 'webform',
+  ));
+  // Loop through webforms and tally the statistic totals.
+  module_load_include('inc', 'webform', 'includes/webform.submissions');
+  foreach ($webforms as $webform) {
+    // Tally submission count.
+    $webform_stats['total_submissions'] += webform_get_submission_count($webform->nid);
+    // Set active/inactive bit and tally.
+    $is_active = atlas_statistics_webform_is_active($webform->nid);
+    $webform_stats['active_forms'] += $is_active == TRUE ? 1 : 0;
+    $webform_stats['inactive_forms'] += $is_active == FALSE ? 1 : 0;
+  }
+
+  $statistics_data['webforms'] = $webform_stats;
+
+  return $statistics_data;
+}
