@@ -497,36 +497,6 @@ function cu_forms_bundle_views_pre_render(&$view) {
 function cu_forms_bundle_atlas_statistics() {
   $statistics_data = array();
 
-  // Count Nodes.
-  $node_query = db_select('node', 'n');
-  $node_query->fields('n', array('type'));
-  $node_query->addExpression('COUNT(type)', 'count_type');
-  $node_query->addExpression('MAX(changed)', 'max_changed');
-  $node_query->groupBy('n.type');
-  $node_query->orderBy('max_changed', 'DESC');
-
-  $node_result = $node_query->execute();
-
-  // Counts for each node type.
-  $all_node_types = $node_result->fetchAll();
-  $node_type_counts = array();
-  foreach ($all_node_types as $object) {
-    $node_type_counts[$object->type] = $object->count_type;
-  }
-
-  $node_key_white_list = array(
-    'webform',
-  );
-  $node_counts_white_listed = array_intersect_key($node_type_counts, array_flip($node_key_white_list));
-  $node_types_off_list = array_diff_key($node_type_counts, array_flip($node_key_white_list));
-
-  if (!empty($node_counts_white_listed)) {
-    $statistics_data['nodes_by_type'] = $node_counts_white_listed;
-  }
-  if (!empty($node_types_off_list)) {
-    $statistics_data['nodes_other'] = implode(", ", array_keys($node_types_off_list));
-  }
-
   $webform_stats = array(
     'total_submissions' => 0,
     'active_forms' => 0,
