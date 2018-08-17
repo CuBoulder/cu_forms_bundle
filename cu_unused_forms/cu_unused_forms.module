@@ -16,6 +16,23 @@ function cu_unused_forms_menu() {
     'description' => 'A list of Forms that are not being displayed on this site.',
     'page callback' => 'cu_unused_forms_list',
     'access arguments' => array('view unused forms'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+  $items['admin/reports/forms/unused/main'] = array(
+    'title' => 'Have not been used recently',
+    'description' => 'A list of Forms that are not being displayed on this site.',
+    'page callback' => 'cu_unused_forms_list',
+    'access arguments' => array('view unused forms'),
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => 0,
+  );
+  $items['admin/reports/forms/unused/remove'] = array(
+    'page callback' => 'cu_unused_forms_list_remove',
+    'page arguments' => array(4),
+    'access arguments' => array('view unused forms'),
+    'title' => 'Can be removed',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 1000,
   );
   return $items;
 }
@@ -47,15 +64,7 @@ function _submissions_from_form($nid) {
   return $submission_info;
 }
 
-/**
- * Page callback for /admin/reports/forms/unused.
- */
-function cu_unused_forms_list() {
-  drupal_add_css(drupal_get_path('module', 'cu_inactive_users') . '/css/cu-inactive-users.css', array('group' => CSS_DEFAULT));
-  $output = [];
-
-  // There are two separate queries because we need to compare nids between the two separate tables.
-  // We need nids and submissions AND status of both.
+function _webform_records() {
   $forms_count_query = db_query('SELECT * FROM webform');
   $forms_count = $forms_count_query->fetchAll();
 
@@ -64,6 +73,16 @@ function cu_unused_forms_list() {
   foreach ($forms_count as $form) {
     $form_nids[] = $form->nid;
   }
+
+  return $form_nids;
+}
+
+/**
+ * Page callback for /admin/reports/forms/unused.
+ */
+function cu_unused_forms_list() {
+  drupal_add_css(drupal_get_path('module', 'cu_inactive_users') . '/css/cu-inactive-users.css', array('group' => CSS_DEFAULT));
+  $output = [];
 
   $list = array();
 
@@ -100,17 +119,17 @@ function cu_unused_forms_list() {
     $time_filters[] = "<a href=\"$base_url/$path?time=$interval\" class=\"$class\">$label</a>";
   }
 
+  $form_nids = _webform_records();
   $forms[] = node_load_multiple($form_nids);
 
   foreach ($forms as $form) {
     // If time matches current filtered time.
     foreach ($form as $key => $stale_form) {
-      $last_submission = '';
-      $total_submissions = '';
       $name = l($stale_form->title, 'node/' . $stale_form->nid . '/edit');
       $author = $stale_form->name;
       $submissions_info = _submissions_from_form($stale_form->nid);
       $webform_updated_date = date('F j, Y', $stale_form->changed);
+      $last_submission_date = date('F j, Y', $submissions_info['last_submission']);
       $last_submission = (!empty($submissions_info['last_submission'])) ? $last_submission_date : 'has no submissions';
       $total_submissions = (!empty($submissions_info['total_submissions'])) ? $submissions_info['total_submissions'] : 'has no submissions';
 
@@ -127,6 +146,36 @@ function cu_unused_forms_list() {
   $output['stale_forms']['filters']['#markup'] = theme('item_list', array('items' => $time_filters, 'attributes' => array('class' => array('inactive-users-time-filters'))));
   $output['stale_forms']['list']['#markup'] = theme('item_list', array('items' => $list, 'attributes' => array('class' => array('bullet-list'))));
 
+
+  return $output;
+}
+
+/**
+ * Menu callback /admin/reports/forms/unused/remove
+ */
+function cu_unused_forms_list_remove() {
+  $output = [];
+  $list = [];
+  $year_ago = time() - 60*60*24*365;
+  $year_ago_date = date('F j, Y', $year_ago);
+
+  $form_nids = _webform_records();
+  foreach ($form_nids as $form) {
+    $form = node_load($form);
+    $submission_info = _submissions_from_form($form->nid);
+
+    $name = l($form->title, 'node/' . $form->nid . '/edit');
+    if ($form->changed < $year_ago && ($submission_info['last_submission'] < $year_ago || $submission_info['last_submission'] == NULL)) {
+      $list[] = $name;
+    }
+  }
+
+  dpm(count($list));
+  $list = (count($list) > 0) ? $list : $list = array('empty' => t('No forms meet the criteria to be removed.'));
+
+  $output['remove_forms']['#prefix'] = '<h2>Can be removed</h2>';
+  $output['remove_forms']['description']['#markup'] = "<p>The webforms listed below have not been updated or had submissions since $year_ago_date.</p>";
+  $output['remove_forms']['list']['#markup'] = theme('item_list', array('items' => $list, 'attributes' => array('class' => array('bullet-list'))));
 
   return $output;
 }
