@@ -36,7 +36,7 @@ function cu_unused_forms_permission() {
  * Page callback for /admin/reports/forms/unused.
  */
 function cu_unused_forms_list() {
-  global $base_url;
+  drupal_add_css(drupal_get_path('module', 'cu_inactive_users') . '/css/cu-inactive-users.css', array('group' => CSS_DEFAULT));
   $output = [];
 
   // There are two separate queries because we need to compare nids between the two separate tables.
@@ -46,64 +46,72 @@ function cu_unused_forms_list() {
 
   $forms_count = $forms_count_query->fetchAll();
   $forms_submissions = $forms_submissions_query->fetchAll();
+  dpm($forms_submissions);
 
   // Return all form nids (webform) to $form_nids.
   $form_nids = array();
   foreach ($forms_count as $form) {
     $form_nids[] = $form->nid;
   }
-  // Load all the webform nids to use later on.
-  $nodes = node_load_multiple($form_nids);
-  $disabled_count = NULL;
-  foreach ($nodes as $node) {
-    if ($node->webform['status'] == 0) {
-      $disabled_count[] = $node;
+
+  $list = array();
+
+  // Set the default time we want to check access for.
+  $time = isset($_GET['time']) ? check_plain($_GET['time']) : 60*60*24*60;
+
+  // Build a readable date we are checking against
+  $now = time();
+  $since = $now - $time;
+  //$since = date('F j, Y', $since);
+
+  // Add some links to allow user to filter by date.
+  $time_filters = array();
+  $time_options = array(
+    '7 Days' => (60*60*24*7),
+    '30 Days' => (60*60*24*30),
+    '90 Days' => (60*60*24*90),
+    '1 Year' => (60*60*24*365),
+  );
+  $path = current_path();
+  global $base_url;
+  // If a time is already set, add a default/reset link.
+  if ($_GET['time']) {
+    $time_filters[] = "<a href=\"$base_url/$path\">Default (60 Days)</a>";
+  }
+  // Loop through time filter options.
+  foreach ($time_options as $label => $interval) {
+    if ($_GET['time'] == $interval) {
+      $class = 'active-time-filter';
+    }
+    else {
+      $class = '';
+    }
+    $time_filters[] = "<a href=\"$base_url/$path?time=$interval\" class=\"$class\">$label</a>";
+  }
+
+  $forms[] = node_load_multiple($form_nids);
+
+  foreach ($forms as $form) {
+    // If time matches current filtered time.
+    foreach ($form as $key => $stale_form) {
+      $last_submission = '';
+      $total_submissions = '';
+      $name = l($stale_form->title, 'node/' . $stale_form->nid . '/edit');
+      $author = $stale_form->name;
+
+      if ($stale_form->changed < $since) {
+        $list[$stale_form->uid] = "$name<br><ul><li>last submission: $last_submission</li><li>total submissions: $total_submissions</li><li><small>$author</small></li></ul>";
+      }
     }
   }
-  $output['all_forms_title']['#markup'] = '<h3>' . count($disabled_count) . t(' disabled form(s)') . '</h3>';
 
-  // If the form's node record is set to disabled, return them under the disabled section.
-  foreach ($nodes as $node) {
-    if ($node->webform['status'] == 0) {
-      $output['all_forms'][$node->nid]['#markup'] = '<li><a href="' . $base_url . '/node/' . $node->nid . '">' . $node->title . '</a></li>';
-    }
-  }
+  $output['stale_forms']['#prefix'] = '<h2>Have not been used recently</h2>';
+  $output['stale_forms']['description']['#markup'] = "<p>The users listed below have not logged in since $since.</p>";
+  $output['stale_forms']['filters']['#prefix'] = '<div class="inactive-time-filter">Use the links below to change the date checked.';
+  $output['stale_forms']['filters']['#suffix'] = '</div>';
+  $output['stale_forms']['filters']['#markup'] = theme('item_list', array('items' => $time_filters, 'attributes' => array('class' => array('inactive-users-time-filters'))));
+  $output['stale_forms']['list']['#markup'] = theme('item_list', array('items' => $list, 'attributes' => array('class' => array('bullet-list'))));
 
-  // Return all submission nids (webform_submissions) to $sub_nids.
-  $sub_nids = array();
-  foreach ($forms_submissions as $sub) {
-    $sub_nids[] = $sub->nid;
-  }
-
-  // If there are submissions, tell us which nids don't have them.
-  // Else, return all the forms because nothing has been submitted.
-  if (count($sub_nids) > 0) {
-    $no_subs = array_diff($form_nids, $sub_nids);
-  }
-  else {
-    $no_subs = $form_nids;
-  }
-
-  // This could be helpful at some point, right?
-  variable_set('cu_unused_forms_count', count($no_subs));
-
-  $output['top_title']['#markup'] = '<br><h3>' . count($no_subs) . t(' unused form(s)') . '</h3>';
-
-  // If there are forms without submissions, return them under the unused forms section.
-  if (count($no_subs) > 0) {
-    foreach ($no_subs as $no_sub_node) {
-      $nids[] = $no_sub_node;
-    }
-
-    // Load all the webform nids to use later on.
-    $nodes = node_load_multiple($nids);
-    foreach ($nodes as $node) {
-      $output['content'][$node->nid]['#markup'] = '<li><a href="' . $base_url . '/node/' . $node->nid . '">' . $node->title . '</a></li>';
-    }
-  }
-  else {
-    $output['content']['#markup'] = '<p>No results found.</p>';
-  }
 
   return $output;
 }
