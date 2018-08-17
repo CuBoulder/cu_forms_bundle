@@ -32,6 +32,21 @@ function cu_unused_forms_permission() {
   );
 }
 
+function _submissions_from_form($nid) {
+  $submission_info = [];
+  $forms_submissions_query = db_query('SELECT * FROM webform_submissions WHERE nid = :nid', array(':nid' => $nid));
+  $forms_submissions = $forms_submissions_query->fetchAll();
+
+  foreach($forms_submissions as $submission) {
+    $submitted[] = $submission->submitted;
+  }
+
+  $submission_info['last_submission'] = max($submitted);
+  $submission_info['total_submissions'] = count($submitted);
+
+  return $submission_info;
+}
+
 /**
  * Page callback for /admin/reports/forms/unused.
  */
@@ -42,11 +57,7 @@ function cu_unused_forms_list() {
   // There are two separate queries because we need to compare nids between the two separate tables.
   // We need nids and submissions AND status of both.
   $forms_count_query = db_query('SELECT * FROM webform');
-  $forms_submissions_query = db_query('SELECT * FROM webform_submissions');
-
   $forms_count = $forms_count_query->fetchAll();
-  $forms_submissions = $forms_submissions_query->fetchAll();
-  dpm($forms_submissions);
 
   // Return all form nids (webform) to $form_nids.
   $form_nids = array();
@@ -62,7 +73,7 @@ function cu_unused_forms_list() {
   // Build a readable date we are checking against
   $now = time();
   $since = $now - $time;
-  //$since = date('F j, Y', $since);
+  $nice_since = date('F j, Y', $since);
 
   // Add some links to allow user to filter by date.
   $time_filters = array();
@@ -98,15 +109,19 @@ function cu_unused_forms_list() {
       $total_submissions = '';
       $name = l($stale_form->title, 'node/' . $stale_form->nid . '/edit');
       $author = $stale_form->name;
+      $submissions_info = _submissions_from_form($stale_form->nid);
+      $webform_updated_date = date('F j, Y', $stale_form->changed);
+      $last_submission = (!empty($submissions_info['last_submission'])) ? $last_submission_date : 'has no submissions';
+      $total_submissions = (!empty($submissions_info['total_submissions'])) ? $submissions_info['total_submissions'] : 'has no submissions';
 
-      if ($stale_form->changed < $since) {
-        $list[$stale_form->uid] = "$name<br><ul><li>last submission: $last_submission</li><li>total submissions: $total_submissions</li><li><small>$author</small></li></ul>";
+      if ($stale_form->changed < $since || $submissions_info['last_submission'] < $since) {
+        $list[$stale_form->nid] = "$name<br><ul><li>Webform last updated: $webform_updated_date</li><li>Last submission: $last_submission</li><li>Total submissions: $total_submissions</li><li><small>Author: $author</small></li></ul>";
       }
     }
   }
 
   $output['stale_forms']['#prefix'] = '<h2>Have not been used recently</h2>';
-  $output['stale_forms']['description']['#markup'] = "<p>The users listed below have not logged in since $since.</p>";
+  $output['stale_forms']['description']['#markup'] = "<p>The webforms listed below have not been updated or had submissions since $nice_since.</p>";
   $output['stale_forms']['filters']['#prefix'] = '<div class="inactive-time-filter">Use the links below to change the date checked.';
   $output['stale_forms']['filters']['#suffix'] = '</div>';
   $output['stale_forms']['filters']['#markup'] = theme('item_list', array('items' => $time_filters, 'attributes' => array('class' => array('inactive-users-time-filters'))));
