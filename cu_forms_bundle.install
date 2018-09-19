@@ -91,3 +91,12 @@ function cu_forms_bundle_update_7006() {
 function cu_forms_bundle_update_7007() {
   module_enable(array('cu_unused_forms'));
 }
+
+/**
+ * Updating site and web emails to prepare for new infrastructure smtp configuration
+ */
+function cu_forms_bundle_update_7008() {
+  variable_set('webform_default_from_address', 'webexpress_noreply@colorado.edu');
+  variable_set('site_mail', 'webexpress_noreply@colorado.edu');
+}
+
