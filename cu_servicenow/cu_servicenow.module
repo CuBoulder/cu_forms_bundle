@@ -1,0 +1,62 @@
+<?php
+
+function cu_servicenow_page_alter(&$page) {
+  //dpm(_servicenow_curl_request());
+}
+
+function cu_servicenow_form_webform_node_form_alter(&$form, &$form_state) {
+  $form['options']['field_cu_servicenow'] = $form['field_cu_servicenow'];
+  unset($form['field_cu_servicenow']);
+  $form['#submit'][] = 'servicenow_submit';
+  dpm($form);
+}
+
+function servicenow_submit() {
+
+}
+
+function _snow_url() {
+  $snow_url = variable_get('servicenow_environment', 'https://dev21034.service-now.com/api/now/table/incident');
+
+  return $snow_url;
+}
+
+function _servicenow_curl_request() {
+  /**
+  curl "https://dev21034.service-now.com/api/now/table/incident" \
+  --request POST \
+  --header "Accept:application/json" \
+  --header "Content-Type:application/json" \
+  --data "{\"assignment_group\":\"Whatever works for me\",\"short_description\":\"Describe this to me\"}" \
+  --user 'admin':'admin'
+   */
+  $key = 'admin';
+  $request = "https://dev21034.service-now.com/api/now/table/incident";
+  $ch = curl_init(); // initialize curl handle
+  curl_setopt($ch, CURLOPT_HTTPHEADER, Array("Accept:application/json"));
+  curl_setopt($ch, CURLOPT_USERPWD, $key);
+  curl_setopt($ch, CURLOPT_URL, $request);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
+  curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+  $result = curl_exec($ch); // run the whole process
+  curl_setopt($ch, CURLOPT_HEADER, 1);
+  curl_setopt($ch, CURLOPT_VERBOSE, 1);
+  $header = curl_exec($ch); // run the whole process
+  curl_close($ch); // close cURL handler
+  $headers = _get_headers_from_curl_response($header);
+  $result = json_decode($result);
+  $result->headers = $headers;
+  if ( (!isset($result->status)) && (!empty($result)) ) {
+    $result->status = 'success';
+  } else {
+    $result->status = 'failure';
+  }
+  if ( ($result->status == 'failure') || (empty($result)) ) {
+    watchdog('cu_servicenow', 'servicenow api not communicating correctly \_(ツ)_/¯ api call: ' . $request);
+    //return NULL;
+    return $header;
+  } else {
+    return $result;
+  }
+}
