@@ -1,18 +1,31 @@
 <?php
-
-function cu_servicenow_page_alter(&$page) {
-  //dpm(_servicenow_curl_request());
-}
-
+/**
+ * Implements hook_form_form_id_alter().
+ *
+ * Move the SN checkbox to the publishing tab.
+ */
 function cu_servicenow_form_webform_node_form_alter(&$form, &$form_state) {
   $form['options']['field_cu_servicenow'] = $form['field_cu_servicenow'];
   unset($form['field_cu_servicenow']);
-  $form['#submit'][] = 'servicenow_submit';
-  dpm($form);
 }
 
-function servicenow_submit() {
+/**
+ * Implements hook_form_alter().
+ *
+ * Add custom submit handler to send info to ServiceNow.
+ */
+function cu_servicenow_form_alter(&$form, &$form_state) {
+  if (isset($form['#node']->webform) && $form['#node']->field_cu_servicenow['und'][0]['value']) {
+    $form['#submit'][] = 'servicenow_submit';
+  }
+}
 
+/**
+ * Custom submit handler for forms with SN integaration enabled.
+ */
+function servicenow_submit(&$form, &$form_state) {
+  // If the current node has SN enabled, do code, else move on.
+  watchdog('cu_servicenow', 'ServiceNow custom submit handler was hit.');
 }
 
 function _snow_url() {

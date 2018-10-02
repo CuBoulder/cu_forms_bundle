@@ -26,8 +26,8 @@ function cu_servicenow_field_default_field_bases() {
     'module' => 'list',
     'settings' => array(
       'allowed_values' => array(
-        0 => 'Disable ServiceNow Integration',
-        1 => 'Enable ServiceNow Integration',
+        0 => 'Disable ServiceNow integration',
+        1 => 'Enable ServiceNow integration',
       ),
       'allowed_values_function' => '',
       'allowed_values_php' => '',
