@@ -26,18 +26,14 @@ function cu_servicenow_form_alter(&$form, &$form_state) {
   }
 }
 
-function cu_servicenow_page_alter(&$page) {
-  _servicenow_curl_request();
-}
-
 /**
  * Custom submit handler for forms with SN integaration enabled.
  */
 function servicenow_submit(&$form, &$form_state) {
   // If the current node has SN enabled, do code, else move on.
   watchdog('cu_servicenow', 'ServiceNow custom submit handler was hit.');
-  $form_values = $form_state['values']['submitted'];
-  dpm($form_state['values']['submitted']);
+  $form_values = $form_state['input']['submitted'];
+  _servicenow_curl_request($form_values);
 }
 
 function _snow_url() {
@@ -64,37 +60,32 @@ function _get_headers_from_curl_response($response) {
   return $headers;
 }
 
-function _servicenow_curl_request() {
-  /**
-  curl "https://dev21034.service-now.com/api/now/table/incident" \
-  --request POST \
-  --header "Accept:application/json" \
-  --header "Content-Type:application/json" \
-  --data "{\"assignment_group\":\"Whatever works for me\",\"short_description\":\"Describe this to me\"}" \
-  --user 'admin':'admin' // user:admin, pass:oJjqG7UMe7rV
-   */
-  $key = 'admin';
+/**
+ * ServiceNow API call via cURL.
+ *
+ * Send in form_values from the custom submit handler.
+ * The values must match available fields in ServiceNow.
+ */
+function _servicenow_curl_request($form_values) {
   $request = "https://dev21034.service-now.com/api/now/table/incident";
-  $form_values = ['assignment_group' => 'Neckwork', 'short_description' => 'Woo!'];
   $content_encode = json_encode($form_values);
   $ch = curl_init(); // initialize curl handle
-  curl_setopt($ch, CURLOPT_HTTPHEADER, Array("Accept:application/json"));
-  curl_setopt($ch, CURLOPT_HTTPHEADER, Array("Content-Type:application/json"));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, Array("Accept:application/json","Content-Type:application/json"));
   curl_setopt($ch, CURLOPT_USERPWD, "admin:oJjqG7UMe7rV");
   curl_setopt($ch, CURLOPT_URL, $request);
   curl_setopt($ch, CURLOPT_POSTFIELDS, $content_encode);
-  //curl_setopt($ch, CURLOPT_POST, '{"assignment_group":"Network","short_description":"Describing what\'s going on."}');
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
   curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
   curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
   $result = curl_exec($ch); // run the whole process
   curl_setopt($ch, CURLOPT_HEADER, 1);
   curl_setopt($ch, CURLOPT_VERBOSE, 1);
-  $header = curl_exec($ch); // run the whole process
+  //$header = curl_exec($ch); // run the whole process
   curl_close($ch); // close cURL handler
-  $headers = _get_headers_from_curl_response($header);
+
+  //$headers = _get_headers_from_curl_response($header);
   $result = json_decode($result);
-  $result->headers = $headers;
+  //$result->headers = $headers;
   if ( (!isset($result->status)) && (!empty($result)) ) {
     $result->status = 'success';
   } else {
@@ -103,8 +94,8 @@ function _servicenow_curl_request() {
   if ( ($result->status == 'failure') || (empty($result)) ) {
     watchdog('cu_servicenow', 'servicenow api not communicating correctly \_(ツ)_/¯ api call: ' . $request);
     //return NULL;
-    dpm($result);
-    return $header;
+    dpm('no worked');
+    //return $header;
   } else {
     dpm('worked');
     return $result;
