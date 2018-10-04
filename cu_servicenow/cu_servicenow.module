@@ -33,7 +33,9 @@ function servicenow_submit(&$form, &$form_state) {
   // If the current node has SN enabled, do code, else move on.
   watchdog('cu_servicenow', 'ServiceNow custom submit handler was hit.');
   $form_values = $form_state['input']['submitted'];
-  _servicenow_curl_request($form_values);
+  //_servicenow_curl_request($form_values);
+  _servicenow_curl_request_file_upload($form_state);
+  dpm($form_state);
 }
 
 function _snow_url() {
@@ -61,6 +63,31 @@ function _get_headers_from_curl_response($response) {
 }
 
 /**
+ * ServiceNow API call via cURL.
+ *
+ * Send in form_values from the custom submit handler.
+ * The values must match available fields in ServiceNow.
+ */
+function _servicenow_curl_request_file_upload($form_state) {
+  $test_sys_id = '3Dd2e134089bc92300aa8cc13ee359ff6c';
+  $request = "https://instance.service-now.com/api/now/attachment/file?table_name=incident&table_sys_id=3Dd2e134089bc92300aa8cc13ee359ff6c&file_name=Issue_screenshot";
+  $content_encode = 'http://localhost/ld7/sites/default/files/webform' . $form_state['complete form']['submitted']['attachment']['#file']->filename;
+  $ch = curl_init(); // initialize curl handle
+  curl_setopt($ch, CURLOPT_HTTPHEADER, Array("Accept:application/json", "Content-Type:document/txt"));
+  curl_setopt($ch, CURLOPT_USERPWD, "admin:oJjqG7UMe7rV");
+  curl_setopt($ch, CURLOPT_URL, $request);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, 'file_contents:@'.$content_encode);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
+  curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+  $result = curl_exec($ch); // run the whole process
+  curl_setopt($ch, CURLOPT_HEADER, 1);
+  curl_setopt($ch, CURLOPT_VERBOSE, 1);
+  //$header = curl_exec($ch); // run the whole process
+  curl_close($ch); // close cURL handler
+}
+
+  /**
  * ServiceNow API call via cURL.
  *
  * Send in form_values from the custom submit handler.
