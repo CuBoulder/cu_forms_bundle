@@ -5,6 +5,35 @@
  * This module sets up a boolean value for webforms to integrate with ServiceNow.
  */
 
+function cu_servicenow_menu() {
+  $items = [];
+
+  $items['admin/config/content/servicenow'] = [
+    'title' => t('ServiceNow Service Account'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cu_servicenow_config_form'),
+    'access arguments' => array('administer modules'),
+  ];
+
+  return $items;
+}
+
+function cu_servicenow_config_form($form, &$form_state) {
+  $form = [];
+
+  $form['sn_username'] = [
+    '#type' => 'textfield',
+    '#title' => t('ServiceNow Username'),
+  ];
+
+  $form['sn_password'] = [
+    '#type' => 'password',
+    '#title' => t('ServiceNow Password'),
+  ];
+
+  return system_settings_form($form);
+}
+
 /**
  * Implements hook_form_form_id_alter().
  *
@@ -21,23 +50,8 @@ function cu_servicenow_form_webform_node_form_alter(&$form, &$form_state) {
  * Add custom submit handler to send info to ServiceNow.
  */
 function cu_servicenow_form_alter(&$form, &$form_state, $form_id) {
-  if (isset($form['#node']->webform) && $form['#node']->field_cu_servicenow['und'][0]['value'] && $form_id != 'webform_component_edit_form') {
+  if (isset($form['#node']->webform) && $form['#node']->field_cu_servicenow['und'][0]['value'] && $form_id != 'webform_component_edit_form' && $form_id != 'webform_node_form') {
     $form['#submit'][] = 'servicenow_submit';
-
-    // Base fields are email, phone, subject, details.
-    $available_sn_fields = [
-      'assignment_group',
-      'short_description',
-      'description',
-      'contact_type', // self-service
-      'category' => [
-        'inquiry|inquiry',
-        'software|software',
-        'hardware|hardware',
-        'network|network',
-        'database|database',
-      ],
-    ];
   }
   if ($form_id == 'webform_component_edit_form' && $form['#node']->field_cu_servicenow['und'][0]['value']) {
     $form['servicenow'] = [
@@ -53,8 +67,6 @@ function cu_servicenow_form_alter(&$form, &$form_state, $form_id) {
       '#options' => [
         'short_description' => 'Short Description',
         'description' => 'Description',
-        'contact_type' => 'Contact', //self-service
-        'category' => 'Category',
       ],
       '#default_value' => variable_get('servicenow_field_mapping[$form[\'form_key\'][\'#default_value\']]', ''),
       '#weight' => 5,
@@ -62,7 +74,6 @@ function cu_servicenow_form_alter(&$form, &$form_state, $form_id) {
     ];
     $form['#submit'][] = 'servicenow_save_field_map';
   }
-  //dpm($form);
 }
 
 function servicenow_save_field_map($form, &$form_state) {
@@ -71,9 +82,8 @@ function servicenow_save_field_map($form, &$form_state) {
     $sn_value = [$form_state['values']['form_key'] => $form_state['values']['servicenow']['field_map']];
     $sn_value = array_merge($current_vars, $sn_value);
     variable_set('servicenow_field_mapping', $sn_value);
-    dpm('it worked, right?');
+    drupal_set_message(t('Successfully mapped webform field to ServiceNow.'), 'notice');
   }
-  //dpm($form_state);
 }
 
 /**
@@ -91,8 +101,6 @@ function servicenow_submit(&$form, &$form_state) {
       $sn[$servicenow_field_map[$key]] = $value;
     }
   }
-
-  //dpm($sn);
 
   _servicenow_curl_request($sn);
 
@@ -134,14 +142,11 @@ function _servicenow_curl_request($form_values) {
   }
   if ( ($result->status == 'failure') || (empty($result)) ) {
     watchdog('cu_servicenow', 'servicenow api not communicating correctly \_(ツ)_/¯ api call: ' . $request);
-    //return NULL;
-    dpm('no worked');
-
-    //return $header;
+    drupal_set_message(t('There was a problem sending your request to ServiceNow. Please contact the site owner.'), 'success');
+    return null;
   } else {
-    dpm('worked');
     $inc_num = $result->result->number;
-    drupal_set_message(t('Your incident number is :incident, please keep this number for your records.', array(':incident' => $inc_num)), 'notice');
+    drupal_set_message(t('Your incident number is :incident, please keep this number for your records.', array(':incident' => $inc_num)), 'success');
     return $result;
   }
 }
