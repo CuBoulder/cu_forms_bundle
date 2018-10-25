@@ -5,6 +5,8 @@
  * This module sets up a boolean value for webforms to integrate with ServiceNow.
  */
 
+require './includes/password.inc';
+
 function cu_servicenow_menu() {
   $items = [];
 
@@ -24,14 +26,30 @@ function cu_servicenow_config_form($form, &$form_state) {
   $form['sn_username'] = [
     '#type' => 'textfield',
     '#title' => t('ServiceNow Username'),
+    '#default_value' => variable_get('sn_username', ''),
+    '#required' => TRUE,
   ];
 
   $form['sn_password'] = [
     '#type' => 'password',
     '#title' => t('ServiceNow Password'),
+    '#default_value' => variable_get('sn_password', ''),
+    '#required' => TRUE,
+  ];
+  //_password_crypt($algo, $password, $setting);
+  $form['submit'] = [
+    '#type' => 'submit',
+    '#value' => t('Set Service Account'),
   ];
 
-  return system_settings_form($form);
+  return $form;
+}
+
+function cu_servicenow_config_form_submit($form, &$form_state) {
+  $pass = $form_state['values']['sn_password'];
+  variable_set('sn_username', $form_state['values']['sn_username']);
+  variable_set('sn_password', $pass);
+  dpm($pass);
 }
 
 /**
@@ -52,6 +70,17 @@ function cu_servicenow_form_webform_node_form_alter(&$form, &$form_state) {
 function cu_servicenow_form_alter(&$form, &$form_state, $form_id) {
   if (isset($form['#node']->webform) && $form['#node']->field_cu_servicenow['und'][0]['value'] && $form_id != 'webform_component_edit_form' && $form_id != 'webform_node_form') {
     $form['#submit'][] = 'servicenow_submit';
+  }
+  if ($form_id == 'webform_configure_form') {
+    $form['servicenow_incident_mapping'] = [
+      '#type' => 'fieldset',
+      '#title' => t('ServiceNow Incident Assignment'),
+    ];
+    $form['servicenow_incident_mapping']['options'] = [
+      '#type' => 'select',
+      '#title' => t('ServiceNow Incident Assignment'),
+      '#options' => array_keys(variable_get('sn_incident_map', ['N/A' => 'N/A'])),
+    ];
   }
   if ($form_id == 'webform_component_edit_form' && $form['#node']->field_cu_servicenow['und'][0]['value']) {
     $form['servicenow'] = [
@@ -90,6 +119,7 @@ function servicenow_save_field_map($form, &$form_state) {
  * Custom submit handler for forms with SN integaration enabled.
  */
 function servicenow_submit(&$form, &$form_state) {
+  global $user;
   $sericenow_fields_for_request = [];
   // If the current node has SN enabled, do code, else move on.
   watchdog('cu_servicenow', 'ServiceNow custom submit handler was hit.');
@@ -102,10 +132,49 @@ function servicenow_submit(&$form, &$form_state) {
     }
   }
 
-  _servicenow_curl_request($sn);
+  $sn['task_for'] = $user->name;
+  $sn['u_alternate_email'] = $user->mail;
+  $sn['state'] = '9';
+  $sn['contact_type'] = 'self-service';
+  $sn['cmdb_ci'] = '9c6238b555beb00096fffc196a1bb892'; // Business Service
+  //$sn['u_nature_of_issue'] = '9c6238b555beb00096fffc196a1bb892'; // Nature of Issue
+  //$sn['impact'] = '9c6238b555beb00096fffc196a1bb892'; // Impact
+  //$sn['urgency'] = '9c6238b555beb00096fffc196a1bb892'; // Urgency
+
+  $incidents = _servicenow_incident_assignments();
+  $sn_incident = [];
+  foreach ($incidents->result as $incident) {
+    $sn_incident[$incident->u_nature_of_issue] = ['sys_id' => $incident->sys_id, 'business_service' => $incident->u_business_service];
+  }
+  variable_set('sn_incident_map', $sn_incident);
+  dpm($sn_incident);
+  //variable_set('sn_incident', $sn_incident);
+  //_servicenow_curl_request($sn);
 
   // Test uploading files
   //_servicenow_upload_file($_FILES['files']['tmp_name']['submitted_attachment'], $_FILES['files']['type']['submitted_attachment'], $_FILES['files']['name']['submitted_attachment']);
+}
+
+function _servicenow_incident_assignments() {
+  $incident_assignment = 'https://coloradosandbox.service-now.com/api/now/v2/table/u_inc_assignment?sysparm_fields=sys_id,u_business_service,u_nature_of_issue,u_active,sys_updated_on&sysparm_display_value=true&sysparm_exclude_reference_link=true';
+
+  $ch = curl_init(); // initialize curl handle
+  curl_setopt($ch, CURLOPT_HTTPHEADER, Array("Accept:application/json","Content-Type:application/json"));
+  curl_setopt($ch, CURLOPT_USERPWD, "admin:password");
+  curl_setopt($ch, CURLOPT_URL, $incident_assignment);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
+  curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+  $result = curl_exec($ch); // run the whole process
+  curl_setopt($ch, CURLOPT_HEADER, 1);
+  curl_setopt($ch, CURLOPT_VERBOSE, 1);
+  //$header = curl_exec($ch); // run the whole process
+  curl_close($ch); // close cURL handler
+
+  //$headers = _get_headers_from_curl_response($header);
+  $result = json_decode($result);
+  //dpm($result);
+  return $result;
 }
 
 /**
@@ -115,11 +184,19 @@ function servicenow_submit(&$form, &$form_state) {
  * The values must match available fields in ServiceNow.
  */
 function _servicenow_curl_request($form_values) {
-  $request = "https://dev21034.service-now.com/api/now/table/incident";
+  global $user;
+  //$request = "https://dev21034.service-now.com/api/now/table/incident";
+  $request = "https://coloradosandbox.service-now.com/api/now/table/incident";
   $content_encode = json_encode($form_values);
+
+  $snuser = variable_get('sn_username', ''); // wexpress
+  $snpass = variable_get('sn_password', ''); // ak9CKm3LDFzUu5Me
+  //$snpass = _check_sn_password($snpass);
+  $user_info = $snuser . ':' . $snpass;
+
   $ch = curl_init(); // initialize curl handle
   curl_setopt($ch, CURLOPT_HTTPHEADER, Array("Accept:application/json","Content-Type:application/json"));
-  curl_setopt($ch, CURLOPT_USERPWD, "admin:oJjqG7UMe7rV");
+  curl_setopt($ch, CURLOPT_USERPWD, "wexpress:ak9CKm3LDFzUu5Me");
   curl_setopt($ch, CURLOPT_URL, $request);
   curl_setopt($ch, CURLOPT_POSTFIELDS, $content_encode);
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -146,6 +223,7 @@ function _servicenow_curl_request($form_values) {
     return null;
   } else {
     $inc_num = $result->result->number;
+    dpm($result);
     drupal_set_message(t('Your incident number is :incident, please keep this number for your records.', array(':incident' => $inc_num)), 'success');
     return $result;
   }
