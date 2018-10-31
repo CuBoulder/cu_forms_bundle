@@ -62,9 +62,9 @@ function cu_servicenow_form_webform_node_form_alter(&$form, &$form_state) {
  * Add custom submit handler to send info to ServiceNow.
  */
 function cu_servicenow_form_alter(&$form, &$form_state, $form_id) {
-  $sn_enabled = variable_get('sn_disable', TRUE);
+  $sn_disabled = variable_get('sn_disable', TRUE);
 
-  //if ($sn_enabled == TRUE) {
+  if ($sn_disabled == FALSE) {
     if (isset($form['#node']->webform) && $form['#node']->field_cu_servicenow['und'][0]['value'] && $form_id != 'webform_component_edit_form' && $form_id != 'webform_node_form') {
       $form['#submit'][] = 'servicenow_submit';
     }
@@ -117,7 +117,10 @@ function cu_servicenow_form_alter(&$form, &$form_state, $form_id) {
       ];
       $form['#submit'][] = 'servicenow_save_field_map';
     }
-  //}
+  } else {
+    $form['field_cu_servicenow']['#access'] = FALSE;
+    dpm($form['field_cu_servicenow']);
+  }
 }
 
 function servicenow_incident_mapping_submit($form, &$form_state) {
