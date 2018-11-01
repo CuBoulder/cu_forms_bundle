@@ -33,14 +33,14 @@ function cu_servicenow_config_form($form, &$form_state) {
     '#default_value' => variable_get('sn_environment', 'https://coloradosandbox.service-now.com'),
   ];
 
-  $form['sn_disable'] = [
+  $form['sn_status'] = [
     '#type' => 'select',
-    '#title' => t('Disable ServiceNow integration for this site?'),
+    '#title' => t('ServiceNow integration status'),
      '#options' => array(
-        0 => t('No'),
-        1 => t('Yes'),
+        1 => t('Enabled'),
+        0 => t('Disabled'),
      ),
-    '#default_value' => variable_get('sn_disable', FALSE),
+    '#default_value' => variable_get('sn_status', TRUE),
   ];
 
   return system_settings_form($form);
@@ -62,10 +62,9 @@ function cu_servicenow_form_webform_node_form_alter(&$form, &$form_state) {
  * Add custom submit handler to send info to ServiceNow.
  */
 function cu_servicenow_form_alter(&$form, &$form_state, $form_id) {
-  $sn_disabled = variable_get('sn_disable', TRUE);
-
-  if ($sn_disabled == FALSE) {
-    if (isset($form['#node']->webform) && $form['#node']->field_cu_servicenow['und'][0]['value'] && $form_id != 'webform_component_edit_form' && $form_id != 'webform_node_form') {
+  $sn_disabled = variable_get('sn_status', TRUE);
+  if ($sn_disabled == TRUE) {
+    if (isset($form['#node']->webform) && $form['#node']->field_cu_servicenow['und'][0]['value'] && $form_id != 'webform_configure_form' && $form_id != 'webform_component_edit_form' && $form_id != 'webform_node_form') {
       $form['#submit'][] = 'servicenow_submit';
     }
     if ($form_id == 'webform_configure_form') {
@@ -90,36 +89,35 @@ function cu_servicenow_form_alter(&$form, &$form_state, $form_id) {
 
       $form['servicenow_incident_mapping']['options'] = [
         '#type' => 'select',
-        '#title' => t('ServiceNow Incident Assignment'),
+        //'#title' => t('ServiceNow Incident Assignment'),
         '#options' => $options,
         '#default_value' => variable_get('sn_incident_sys_id_' . $nid, ''),
       ];
       $form['#submit'][] = 'servicenow_incident_mapping_submit';
     }
-    if ($form_id == 'webform_component_edit_form' && $form['#node']->field_cu_servicenow['und'][0]['value']) {
-      $form['servicenow'] = [
-        '#type' => 'fieldset',
-        '#title' => t('ServiceNow'),
-        '#collapsible' => TRUE,
-        '#collapsed' => FALSE,
-        '#weight' => 5,
-      ];
-      $form['servicenow']['field_map'] = [
-        '#type' => 'select',
-        '#title' => t('Map this field to a ServiceNow Incident field below'),
-        '#options' => [
-          'short_description' => 'Short Description',
-          'description' => 'Description',
-        ],
-        '#default_value' => variable_get('servicenow_field_mapping[$form[\'form_key\'][\'#default_value\']]', ''),
-        '#weight' => 5,
-        '#required' => TRUE,
-      ];
-      $form['#submit'][] = 'servicenow_save_field_map';
+    if ($form_id == 'webform_component_edit_form') {
+      if ($form['#node']->field_cu_servicenow['und'][0]['value']) {
+        $form['servicenow'] = [
+          '#type' => 'fieldset',
+          '#title' => t('ServiceNow'),
+          '#collapsible' => TRUE,
+          '#collapsed' => FALSE,
+          '#weight' => 5,
+        ];
+        $form['servicenow']['field_map'] = [
+          '#type' => 'select',
+          '#title' => t('Map this field to a ServiceNow Incident field below'),
+          '#options' => [
+            'short_description' => 'Short Description',
+            'description' => 'Description',
+          ],
+          '#default_value' => variable_get('servicenow_field_mapping[$form[\'form_key\'][\'#default_value\']]', ''),
+          '#weight' => 5,
+          '#required' => TRUE,
+        ];
+        $form['#submit'][] = 'servicenow_save_field_map';
+      }
     }
-  } else {
-    $form['field_cu_servicenow']['#access'] = FALSE;
-    dpm($form['field_cu_servicenow']);
   }
 }
 
@@ -180,13 +178,10 @@ function servicenow_submit(&$form, &$form_state) {
   $sn['contact_type'] = 'self-service';
   $sn['cmdb_ci'] = $sn_incident_map['business_service']; // Business Service
   $sn['u_nature_of_issue'] = $sn_incident_map['nature_of_issue']; // Nature of Issue
-  $sn['impact'] = '9c6238b555beb00096fffc196a1bb892'; // Impact
-  $sn['urgency'] = '9c6238b555beb00096fffc196a1bb892'; // Urgency
-
-  // @todo add incident assignments from form options/settings.
+  //$sn['impact'] = '9c6238b555beb00096fffc196a1bb892'; // Impact
+  //$sn['urgency'] = '9c6238b555beb00096fffc196a1bb892'; // Urgency
 
   _servicenow_curl_request($sn);
-  //dpm($sn);
 
   // Test uploading files
   //_servicenow_upload_file($_FILES['files']['tmp_name']['submitted_attachment'], $_FILES['files']['type']['submitted_attachment'], $_FILES['files']['name']['submitted_attachment']);
@@ -263,12 +258,9 @@ function _servicenow_curl_request($form_values) {
   }
 }
 
-function _snow_url() {
-  $snow_url = variable_get('servicenow_environment', 'https://dev21034.service-now.com/api/now/table/incident');
-
-  return $snow_url;
-}
-
+/**
+ * Get headers from curl response for use later.
+ */
 function _get_headers_from_curl_response($response) {
   $headers = array();
 
@@ -294,6 +286,7 @@ function _get_headers_from_curl_response($response) {
  * The values must match available fields in ServiceNow.
  */
 function _servicenow_upload_file($tmp_name, $type, $name) {
+  global $conf;
   $request = "https://dev21034.service-now.com/api/now/attachment/upload";
   $sys_id = 'd81171569b812300aa8cc13ee359ffba'; // INC0010066
 
@@ -306,7 +299,7 @@ function _servicenow_upload_file($tmp_name, $type, $name) {
   curl_setopt($ch, CURLOPT_URL, "https://dev21034.service-now.com/api/now/attachment/upload");
   curl_setopt($ch, CURLOPT_POST, 1);
   curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-  curl_setopt($ch, CURLOPT_USERPWD, "admin:oJjqG7UMe7rV");
+  curl_setopt($ch, CURLOPT_USERPWD, $conf('sn_key'));
 
   $result = curl_exec($ch);
   if (curl_errno($ch)) {

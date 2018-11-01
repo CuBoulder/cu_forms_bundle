@@ -1,0 +1,7 @@
+<?php
+
+function cu_servicenow_install() {
+  variable_set('sn_environment', 'https://coloradosandbox.service-now.com');
+  variable_set('sn_status', TRUE);
+  _servicenow_incident_assignments();
+}
