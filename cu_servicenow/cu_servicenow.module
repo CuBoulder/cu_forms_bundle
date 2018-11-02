@@ -183,7 +183,7 @@ function servicenow_submit(&$form, &$form_state) {
   //$sn['impact'] = '9c6238b555beb00096fffc196a1bb892'; // Impact
   //$sn['urgency'] = '9c6238b555beb00096fffc196a1bb892'; // Urgency
 
-  //$request = _servicenow_curl_request($sn);
+  $request = _servicenow_curl_request($sn);
 
   // Test uploading files
   $name = $_FILES['files']['name']['submitted_file'];
@@ -196,8 +196,8 @@ function servicenow_submit(&$form, &$form_state) {
   $location = $base_url . '/sites/default/files/';
   $curlfile = str_replace('public://', $location, $fileuri);
 
-  //$temp_sys_id = $request->result->sys_id;
-  $temp_sys_id = '648816114fa523000e7decee0210c79f'; // INC0478268 in sandbox
+  $temp_sys_id = $request->result->sys_id;
+  //$temp_sys_id = '648816114fa523000e7decee0210c79f'; // INC0478268 in sandbox
 
   $file_upload = _servicenow_upload_file($temp_sys_id, $curlfile, $filename, $filetype);
 }
@@ -282,7 +282,8 @@ function _servicenow_curl_request($form_values) {
 function _servicenow_upload_file($sys_id, $location, $filename, $filetype) {
   global $conf;
   $request = variable_get('sn_environment', 'https://coloradosandbox.service-now.com');
-  $request .= '/api/now/attachment/upload?table_name=incident&table_sys_id=' . $sys_id . '&file_name=' . $filename;
+  $request .= '/api/now/attachment/file?table_name=incident&table_sys_id=' . $sys_id . '&file_name=' . $filename;
+  //$request .= '/api/now/attachment/upload?table_name=incident&table_sys_id=' . $sys_id . '&file_name=' . $filename;
   //$sys_id = 'd81171569b812300aa8cc13ee359ffba'; // INC0010066
 
   // -F 'table_name=incident' -F 'table_sys_id=d71f7935c0a8016700802b64c67c11c6' -F 'encryption_context=undefined'-F 'uploadFile=@ location of the file on file system'
@@ -291,23 +292,23 @@ function _servicenow_upload_file($sys_id, $location, $filename, $filetype) {
 
   $user_info = $conf['sn_key'];
 
-  //$cfile = curl_file_create($location, $filetype, $filename);
-
   // Test uploading files
   $name = $_FILES['files']['name']['submitted_file'];
   $type = $_FILES['files']['type']['submitted_file'];
   $tmp_name = $_FILES['files']['tmp_name']['submitted_file'];
-  $cfile = new CURLfile($location, $type, $name);
+  //$cfile = curl_file_create($location, $filetype, $filename);
+  //$cfile = new CURLfile($location, $type, $name);
 
   $data = [
-    'table_name' => 'incident',
-    'table_sys_id' => $sys_id,
-    'encryption_context' => 'undefined',
-    'files[submitted_file]' => $cfile,
+    //'table_name' => 'incident',
+    //'table_sys_id' => $sys_id,
+    //'encryption_context' => 'undefined',
+    'uploadFile' => '@' . $location,
   ];
+  $content_type = 'Content-Type:' . $filetype;
 
   curl_setopt($ch, CURLOPT_URL, $request);
-  //curl_setopt($ch, CURLOPT_HTTPHEADER, Array('Accept:appliaction/json', 'Content-Type:multipart/form-data'));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, Array('Accept:application/json', $content_type));
   curl_setopt($ch, CURLOPT_POST, 1);
   curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
   curl_setopt($ch, CURLOPT_USERPWD, $user_info);
@@ -316,7 +317,7 @@ function _servicenow_upload_file($sys_id, $location, $filename, $filetype) {
   if (curl_errno($ch)) {
     $result = curl_error($ch);
   }
-  dpm($cfile);
+  dpm($result);
   curl_close ($ch);
 }
 
