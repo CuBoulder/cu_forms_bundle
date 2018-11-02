@@ -161,6 +161,10 @@ function servicenow_submit(&$form, &$form_state) {
   global $base_url;
   $nid = $form['#node']->nid;
 
+  $fileuri = $form_state['complete form']['submitted']['file']['#file']->uri;
+  $location = $base_url . '/sites/default/files/';
+  $location = str_replace('public://', $location, $fileuri);
+
   // If the current node has SN enabled, do code, else move on.
   watchdog('cu_servicenow', 'ServiceNow custom submit handler was hit.');
   $form_values = $form_state['input']['submitted'];
@@ -171,6 +175,13 @@ function servicenow_submit(&$form, &$form_state) {
       $sn[$servicenow_field_map[$key]] = $value;
     }
   }
+
+  foreach ($form_values as $form_value) {
+    if (key_exists('fid', $form_value)) {
+      $sn['description'] = $sn['description'] . ' (File location: ' . $location . ')';
+    }
+  }
+  dpm($sn);
 
   $sn_incident_map = variable_get('sn_incident_' . $nid, []);
 
@@ -184,22 +195,13 @@ function servicenow_submit(&$form, &$form_state) {
   //$sn['urgency'] = '9c6238b555beb00096fffc196a1bb892'; // Urgency
 
   $request = _servicenow_curl_request($sn);
+  dpm($request);
 
   // Test uploading files
-  $name = $_FILES['files']['name']['submitted_file'];
-  $type = $_FILES['files']['type']['submitted_file'];
-  $tmp_name = $_FILES['files']['tmp_name']['submitted_file'];
-
-  $filename = $form_state['complete form']['submitted']['file']['#file']->filename;
-  $filetype = $form_state['complete form']['submitted']['file']['#file']->filemime;
-  $fileuri = $form_state['complete form']['submitted']['file']['#file']->uri;
-  $location = $base_url . '/sites/default/files/';
-  $curlfile = str_replace('public://', $location, $fileuri);
-
-  $temp_sys_id = $request->result->sys_id;
+  //$temp_sys_id = $request->result->sys_id;
   //$temp_sys_id = '648816114fa523000e7decee0210c79f'; // INC0478268 in sandbox
 
-  $file_upload = _servicenow_upload_file($temp_sys_id, $curlfile, $filename, $filetype);
+  //$file_upload = _servicenow_upload_file($temp_sys_id, $curlfile, $filename, $filetype);
 }
 
 function _servicenow_incident_assignments() {
@@ -303,7 +305,8 @@ function _servicenow_upload_file($sys_id, $location, $filename, $filetype) {
     //'table_name' => 'incident',
     //'table_sys_id' => $sys_id,
     //'encryption_context' => 'undefined',
-    'uploadFile' => '@' . $location,
+    //'uploadFile' => '@' . $location,
+    'files[submitted_file]' => '@' . $tmp_name,
   ];
   $content_type = 'Content-Type:' . $filetype;
 
