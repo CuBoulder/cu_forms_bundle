@@ -23,17 +23,18 @@ function cu_servicenow_config_form($form, &$form_state) {
 
   $form['sn_environment'] = [
     '#type' => 'select',
-    '#title' => t('ServiceNow Username'),
+    '#title' => t('Environment'),
     '#options' => [
       'https://coloradosandbox.service-now.com' => t('Sandbox'),
       'https://colorado.service-now.com' => t('Production'),
+      'https://owenmorrill.com' => t('Owen'),
     ],
     '#default_value' => variable_get('sn_environment', 'https://coloradosandbox.service-now.com'),
   ];
 
   $form['sn_status'] = [
     '#type' => 'select',
-    '#title' => t('ServiceNow integration status'),
+    '#title' => t('Status'),
      '#options' => array(
         1 => t('Enabled'),
         0 => t('Disabled'),
@@ -60,7 +61,6 @@ function cu_servicenow_form_webform_node_form_alter(&$form, &$form_state) {
  * Add custom submit handler to send info to ServiceNow.
  */
 function cu_servicenow_form_alter(&$form, &$form_state, $form_id) {
-  dpm($form);
   $sn_disabled = variable_get('sn_status', TRUE);
   if ($sn_disabled == TRUE) {
     if (isset($form['#node']->webform) && $form['#node']->field_cu_servicenow['und'][0]['value'] && $form_id != 'webform_configure_form' && $form_id != 'webform_component_edit_form' && $form_id != 'webform_node_form') {
@@ -194,14 +194,13 @@ function servicenow_submit(&$form, &$form_state) {
   //$sn['urgency'] = '9c6238b555beb00096fffc196a1bb892'; // Urgency
 
   $request = _servicenow_curl_request($sn);
-  //dpm($request);
 
   // Test uploading files
   $temp_sys_id = $request->result->sys_id;
   //$temp_sys_id = '648816114fa523000e7decee0210c79f'; // INC0478268 in sandbox
 
   //$file_upload = _servicenow_upload_file($temp_sys_id, $curlfile, $filename, $filetype);
-  $file_upload = _servicenow_upload_file($temp_sys_id, $location);
+  //$file_upload = _servicenow_upload_file($temp_sys_id, $location);
 }
 
 function _servicenow_incident_assignments() {
@@ -265,11 +264,12 @@ function _servicenow_curl_request($form_values) {
     $result->status = 'failure';
   }
   if ( ($result->status == 'failure') || (empty($result)) ) {
-    watchdog('cu_servicenow', 'servicenow api not communicating correctly \_(ツ)_/¯ api call: ' . $request);
+    watchdog('cu_servicenow', 'ServiceNow api not communicating correctly: ' . $request);
     drupal_set_message(t('There was a problem sending your request to ServiceNow. Please contact the site owner.'), 'success');
     return null;
   } else {
     $inc_num = $result->result->number;
+    watchdog('cu_servicenow', 'ServiceNow incident was successfully sent: :incident', array(':incident' => $inc_num));
     drupal_set_message(t('Your incident number is :incident, please keep this number for your records.', array(':incident' => $inc_num)), 'success');
     return $result;
   }
