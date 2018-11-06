@@ -65,6 +65,7 @@ function cu_servicenow_form_alter(&$form, &$form_state, $form_id) {
   if ($sn_disabled == TRUE) {
     if (isset($form['#node']->webform) && $form['#node']->field_cu_servicenow['und'][0]['value'] && $form_id != 'webform_configure_form' && $form_id != 'webform_component_edit_form' && $form_id != 'webform_node_form') {
       $form['#submit'][] = 'servicenow_submit';
+      //$form['#submit'][] = '_get_headers_from_curl_response';
     }
     if ($form_id == 'webform_configure_form') {
       $form['servicenow_incident_mapping'] = [
@@ -161,9 +162,10 @@ function servicenow_submit(&$form, &$form_state) {
   global $base_url;
   $nid = $form['#node']->nid;
 
-  $fileuri = $form_state['complete form']['submitted']['file']['#file']->uri;
+  $file_id = $form_state['complete form']['submitted']['file']['#file']->fid;
+  $file = $form_state['complete form']['submitted']['file']['#file'];
   $location = $base_url . '/sites/default/files/';
-  $location = str_replace('public://', $location, $fileuri);
+  $location = str_replace('public://', $location, $file->uri);
 
   // If the current node has SN enabled, do code, else move on.
   watchdog('cu_servicenow', 'ServiceNow custom submit handler was hit.');
@@ -190,8 +192,6 @@ function servicenow_submit(&$form, &$form_state) {
   $sn['contact_type'] = 'self-service';
   $sn['cmdb_ci'] = $sn_incident_map['business_service']; // Business Service
   $sn['u_nature_of_issue'] = $sn_incident_map['nature_of_issue']; // Nature of Issue
-  //$sn['impact'] = '9c6238b555beb00096fffc196a1bb892'; // Impact
-  //$sn['urgency'] = '9c6238b555beb00096fffc196a1bb892'; // Urgency
 
   $request = _servicenow_curl_request($sn);
 
@@ -199,8 +199,9 @@ function servicenow_submit(&$form, &$form_state) {
   $temp_sys_id = $request->result->sys_id;
   //$temp_sys_id = '648816114fa523000e7decee0210c79f'; // INC0478268 in sandbox
 
-  //$file_upload = _servicenow_upload_file($temp_sys_id, $curlfile, $filename, $filetype);
-  //$file_upload = _servicenow_upload_file($temp_sys_id, $location);
+  $file_mimetype = $form_state['complete form']['submitted']['file']['#file']->filemime;
+
+  _servicenow_upload_file($temp_sys_id, pathinfo($file->uri), $file_mimetype);
 }
 
 function _servicenow_incident_assignments() {
@@ -281,33 +282,37 @@ function _servicenow_curl_request($form_values) {
  * Send in form_values from the custom submit handler.
  * The values must match available fields in ServiceNow.
  */
-function _servicenow_upload_file($sys_id, $location) {
+function _servicenow_upload_file($sys_id, $file_pathinfo, $file_mimetype) {
   global $conf;
-
-  $name = $_FILES['files']['name']['submitted_file'];
-  $type = $_FILES['files']['type']['submitted_file'];
-  $tmp_name = $_FILES['files']['tmp_name']['submitted_file'];
+  //$sys_id = '648816114fa523000e7decee0210c79f'; // INC0478268 in sandbox
 
   $request = variable_get('sn_environment', 'https://coloradosandbox.service-now.com');
-  $request .= '/api/now/attachment/file?table_name=incident&table_sys_id=' . $sys_id . '&file_name=' . $name;
+  $request .= '/api/now/attachment/upload';
 
   $ch = curl_init();
 
   $user_info = $conf['sn_key'];
+  // -F 'table_name=incident' -F 'table_sys_id=d71f7935c0a8016700802b64c67c11c6' -F 'encryption_context=undefined'-F 'uploadFile=@ location of the file on file system'
 
-  // Test uploading files
+  $realpath = drupal_realpath($file_pathinfo['dirname'] . '/' . $file_pathinfo['basename']);
+
   $data = [
-    'files[submitted_file]' => file_get_contents($location),
+    'table_name' => 'incident',
+    'table_sys_id' => $sys_id,
+    'encryption_context' => 'undefined',
+    'uploadFile' => new CURLFile($realpath, $file_mimetype, $file_pathinfo['basename']),
+    //'uploadFile' => '@' . $file_id->uri,
   ];
-  $content_type = 'Content-Type:' . $type;
 
   curl_setopt($ch, CURLOPT_URL, $request);
-  curl_setopt($ch, CURLOPT_HTTPHEADER, Array('Accept:application/json', $content_type));
+  //curl_setopt($ch, CURLOPT_HTTPHEADER, Array('Accept:application/json', 'Content-Type:multipart/form-data'));
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
   curl_setopt($ch, CURLOPT_POST, 1);
   curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
   curl_setopt($ch, CURLOPT_USERPWD, $user_info);
 
   $result = curl_exec($ch);
+
   if (curl_errno($ch)) {
     $result = curl_error($ch);
   }
