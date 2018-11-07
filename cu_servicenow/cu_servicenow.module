@@ -65,7 +65,6 @@ function cu_servicenow_form_alter(&$form, &$form_state, $form_id) {
   if ($sn_disabled == TRUE) {
     if (isset($form['#node']->webform) && $form['#node']->field_cu_servicenow['und'][0]['value'] && $form_id != 'webform_configure_form' && $form_id != 'webform_component_edit_form' && $form_id != 'webform_node_form') {
       $form['#submit'][] = 'servicenow_submit';
-      //$form['#submit'][] = '_get_headers_from_curl_response';
     }
     if ($form_id == 'webform_configure_form') {
       $form['servicenow_incident_mapping'] = [
@@ -179,13 +178,15 @@ function servicenow_submit(&$form, &$form_state) {
   }
 
   foreach ($form_values as $form_value) {
-    if (key_exists('fid', $form_value)) {
+    if (is_array($form_value) && key_exists('fid', $form_value)) {
       $sn['description'] = $sn['description'] . ' (File location: ' . $location . ')';
     }
   }
 
   $sn_incident_map = variable_get('sn_incident_' . $nid, []);
 
+  // Some of these values don't need to be variables.
+  // Using the user account values means they must be logged in.
   $sn['task_for'] = $user->name;
   $sn['u_alternate_email'] = $user->mail;
   $sn['state'] = '9';
@@ -195,15 +196,22 @@ function servicenow_submit(&$form, &$form_state) {
 
   $request = _servicenow_curl_request($sn);
 
-  // Test uploading files
+  // If there is a field with an fid, send file as attachment with incident.
   $temp_sys_id = $request->result->sys_id;
-  //$temp_sys_id = '648816114fa523000e7decee0210c79f'; // INC0478268 in sandbox
-
   $file_mimetype = $form_state['complete form']['submitted']['file']['#file']->filemime;
 
-  _servicenow_upload_file($temp_sys_id, pathinfo($file->uri), $file_mimetype);
+  foreach ($form_state['complete form']['submitted'] as $key => $form_field) {
+    if (is_array($form_field) && key_exists('fid', $form_field)) {
+      _servicenow_upload_file($temp_sys_id, pathinfo($file->uri), $file_mimetype);
+    }
+  }
 }
 
+/**
+ * Available under "form settings" when creating/editing a form.
+ *
+ * This returns a list of options for incident assignments.
+ */
 function _servicenow_incident_assignments() {
   global $conf;
   $incident_assignment = variable_get('sn_environment', 'https://coloradosandbox.service-now.com') . '/api/now/v2/table/u_inc_assignment?sysparm_fields=sys_id,u_business_service,u_nature_of_issue,u_active,sys_updated_on&sysparm_display_value=true&sysparm_exclude_reference_link=true';
@@ -221,14 +229,17 @@ function _servicenow_incident_assignments() {
   //$header = curl_exec($ch); // run the whole process
   curl_close($ch); // close cURL handler
 
-  //$headers = _get_headers_from_curl_response($header);
   $result = json_decode($result);
+  watchdog('cu_servicenow', 'ServiceNow incident assignment list cURL request was successful.');
 
   return $result;
 }
 
 /**
  * ServiceNow API call via cURL.
+ *
+ * See documentation here:
+ * https://docs.servicenow.com/bundle/geneva-servicenow-platform/page/integrate/inbound_rest/reference/r_TableAPI-POST.html
  *
  * Send in form_values from the custom submit handler.
  * The values must match available fields in ServiceNow.
@@ -255,7 +266,6 @@ function _servicenow_curl_request($form_values) {
   //$header = curl_exec($ch); // run the whole process
   curl_close($ch); // close cURL handler
 
-  //$headers = _get_headers_from_curl_response($header);
   $result = json_decode($result);
 
   //$result->headers = $headers;
@@ -277,10 +287,12 @@ function _servicenow_curl_request($form_values) {
 }
 
 /**
- * ServiceNow API call via cURL.
+ * ServiceNow Attachment API call via cURL.
  *
- * Send in form_values from the custom submit handler.
- * The values must match available fields in ServiceNow.
+ * See documentation here:
+ * https://docs.servicenow.com/bundle/geneva-servicenow-platform/page/integrate/inbound_rest/reference/r_AttachmentAPI-POSTmultipart.html
+ *
+ * If an fid is found, we need to send that up to SN as an attachment.
  */
 function _servicenow_upload_file($sys_id, $file_pathinfo, $file_mimetype) {
   global $conf;
@@ -294,6 +306,8 @@ function _servicenow_upload_file($sys_id, $file_pathinfo, $file_mimetype) {
   $user_info = $conf['sn_key'];
   // -F 'table_name=incident' -F 'table_sys_id=d71f7935c0a8016700802b64c67c11c6' -F 'encryption_context=undefined'-F 'uploadFile=@ location of the file on file system'
 
+  // drupal_realpath should only be used when we control the variable being used.
+  // Otherwise there are security risks involved.
   $realpath = drupal_realpath($file_pathinfo['dirname'] . '/' . $file_pathinfo['basename']);
 
   $data = [
@@ -301,11 +315,10 @@ function _servicenow_upload_file($sys_id, $file_pathinfo, $file_mimetype) {
     'table_sys_id' => $sys_id,
     'encryption_context' => 'undefined',
     'uploadFile' => new CURLFile($realpath, $file_mimetype, $file_pathinfo['basename']),
-    //'uploadFile' => '@' . $file_id->uri,
   ];
 
   curl_setopt($ch, CURLOPT_URL, $request);
-  //curl_setopt($ch, CURLOPT_HTTPHEADER, Array('Accept:application/json', 'Content-Type:multipart/form-data'));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, Array('Accept:application/json'));
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
   curl_setopt($ch, CURLOPT_POST, 1);
   curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
@@ -316,26 +329,6 @@ function _servicenow_upload_file($sys_id, $file_pathinfo, $file_mimetype) {
   if (curl_errno($ch)) {
     $result = curl_error($ch);
   }
+  watchdog('cu_servicenow', 'File attachment sent to SerivieNow: ' . $result);
   curl_close ($ch);
-}
-
-/**
- * Get headers from curl response for use later.
- */
-function _get_headers_from_curl_response($response) {
-  $headers = array();
-
-  $header_text = substr($response, 0, strpos($response, "\r\n\r\n"));
-
-  foreach (explode("\r\n", $header_text) as $i => $line)
-    if ($i === 0)
-      $headers['http_code'] = $line;
-    else
-    {
-      list ($key, $value) = explode(': ', $line);
-
-      $headers[$key] = $value;
-    }
-
-  return $headers;
 }
