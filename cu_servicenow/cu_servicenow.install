@@ -1,7 +1,14 @@
 <?php
 
 function cu_servicenow_install() {
+  global $conf;
+  if (isset($conf['sn_key'])) {
+    variable_set('sn_status', '1');
+    watchdog('sn_servicenow', t('ServiceNow key found in settings, enabling integration for this site.'));
+  } else {
+    variable_set('sn_status', '0');
+    watchdog('sn_servicenow', t('ServiceNow key not found in settings, disabling integration for this site.'));
+  }
   variable_set('sn_environment', 'https://coloradosandbox.service-now.com');
-  variable_set('sn_status', TRUE);
   _servicenow_incident_assignments();
 }

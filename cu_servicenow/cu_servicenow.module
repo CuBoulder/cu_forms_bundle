@@ -10,6 +10,7 @@ function cu_servicenow_menu() {
 
   $items['admin/config/content/servicenow'] = [
     'title' => t('ServiceNow Service Account'),
+    'description' => t('Configuration options for ServiceNow/Webform integration.'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('cu_servicenow_config_form'),
     'access arguments' => array('administer modules'),
@@ -27,7 +28,6 @@ function cu_servicenow_config_form($form, &$form_state) {
     '#options' => [
       'https://coloradosandbox.service-now.com' => t('Sandbox'),
       'https://colorado.service-now.com' => t('Production'),
-      'https://owenmorrill.com' => t('Owen'),
     ],
     '#default_value' => variable_get('sn_environment', 'https://coloradosandbox.service-now.com'),
   ];
@@ -36,13 +36,29 @@ function cu_servicenow_config_form($form, &$form_state) {
     '#type' => 'select',
     '#title' => t('Status'),
      '#options' => array(
-        1 => t('Enabled'),
-        0 => t('Disabled'),
+        TRUE => t('Enabled'),
+        FALSE => t('Disabled'),
      ),
     '#default_value' => variable_get('sn_status', TRUE),
   ];
+  $form['submit'] = [
+    '#type' => 'submit',
+    '#value' => t('Save configuration'),
+  ];
 
-  return system_settings_form($form);
+  return $form;
+}
+
+function cu_servicenow_config_form_validate($form, &$form_state) {
+  global $conf;
+  if (!isset($conf['sn_key']) && $form_state['values']['sn_status'] == '1') {
+    form_set_error('sn_status', t('ServiceNow key must be set before enabling.'));
+  }
+}
+
+function cu_servicenow_config_form_submit($form, &$form_state) {
+  variable_set('sn_environment', $form_state['values']['sn_environment']);
+  variable_set('sn_status', $form_state['values']['sn_status']);
 }
 
 /**
@@ -61,8 +77,8 @@ function cu_servicenow_form_webform_node_form_alter(&$form, &$form_state) {
  * Add custom submit handler to send info to ServiceNow.
  */
 function cu_servicenow_form_alter(&$form, &$form_state, $form_id) {
-  $sn_disabled = variable_get('sn_status', TRUE);
-  if ($sn_disabled == TRUE) {
+  $sn_status = variable_get('sn_status', TRUE);
+  if ($sn_status == TRUE) {
     if (isset($form['#node']->webform) && $form['#node']->field_cu_servicenow['und'][0]['value'] && $form_id != 'webform_configure_form' && $form_id != 'webform_component_edit_form' && $form_id != 'webform_node_form') {
       $form['#submit'][] = 'servicenow_submit';
     }
@@ -119,6 +135,9 @@ function cu_servicenow_form_alter(&$form, &$form_state, $form_id) {
         $form['#submit'][] = 'servicenow_save_field_map';
       }
     }
+  } else {
+    // Don't show the SN integration option on webform creation/edit.
+    $form['field_cu_servicenow']['#access'] = FALSE;
   }
 }
 
@@ -161,7 +180,6 @@ function servicenow_submit(&$form, &$form_state) {
   global $base_url;
   $nid = $form['#node']->nid;
 
-  $file_id = $form_state['complete form']['submitted']['file']['#file']->fid;
   $file = $form_state['complete form']['submitted']['file']['#file'];
   $location = $base_url . '/sites/default/files/';
   $location = str_replace('public://', $location, $file->uri);
