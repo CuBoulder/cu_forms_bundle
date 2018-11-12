@@ -195,7 +195,6 @@ function servicenow_submit(&$form, &$form_state) {
   $nid = $form['#node']->nid;
 
   // If the current node has SN enabled, do code, else move on.
-  watchdog('cu_servicenow', 'ServiceNow custom submit handler was hit.');
   $form_values = $form_state['input']['submitted'];
   $sn_field_map = variable_get('sn_field_mapping', '');
 
@@ -217,15 +216,16 @@ function servicenow_submit(&$form, &$form_state) {
   $sn['contact_type'] = 'self-service';
   $sn['cmdb_ci'] = $sn_incident_map['business_service']; // Business Service
   $sn['u_nature_of_issue'] = $sn_incident_map['nature_of_issue']; // Nature of Issue
-  //$sn['u_intg_assignment'] = 'fa5c99c34f692f404729029d0210c732'; // Nature of Issue
-  //sn['u_intg_table'] = 'incident'; // Nature of Issue
+  $sn['u_intg_assignment'] = 'fa5c99c34f692f404729029d0210c732'; // Nature of Issue
+  $sn['u_intg_table'] = 'incident'; // Nature of Issue
 
   $request = _servicenow_curl_request($sn);
+  _form_report_thyself();
 
   // If there is a field with an fid, send file as attachment with incident.
 
   foreach ($form_state['complete form']['submitted'] as $field) {
-    if ($field['#type'] == 'managed_file' && $field['#value']['fid'] != 0) {
+    if (isset($field['#type']) && $field['#type'] == 'managed_file' && $field['#value']['fid'] != 0) {
       $file = $form_state['complete form']['submitted'][$field['#title']]['#file'];
       $location = $base_url . '/sites/default/files/';
       $location = str_replace('public://', $location, $file->uri);
@@ -257,18 +257,17 @@ function _servicenow_incident_assignments() {
   global $conf;
   $incident_assignment = variable_get('sn_environment', 'https://coloradosandbox.service-now.com') . '/api/now/v2/table/u_inc_assignment?sysparm_fields=sys_id,u_business_service,u_nature_of_issue,u_active,sys_updated_on&sysparm_display_value=true&sysparm_exclude_reference_link=true';
 
-  $ch = curl_init(); // initialize curl handle
+  $ch = curl_init();
   curl_setopt($ch, CURLOPT_HTTPHEADER, Array("Accept:application/json","Content-Type:application/json"));
   curl_setopt($ch, CURLOPT_USERPWD, $conf['sn_key']);
   curl_setopt($ch, CURLOPT_URL, $incident_assignment);
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
   curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
   curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-  $result = curl_exec($ch); // run the whole process
+  $result = curl_exec($ch);
   curl_setopt($ch, CURLOPT_HEADER, 1);
   curl_setopt($ch, CURLOPT_VERBOSE, 1);
-  //$header = curl_exec($ch); // run the whole process
-  curl_close($ch); // close cURL handler
+  curl_close($ch);
 
   $result = json_decode($result);
   watchdog('cu_servicenow', 'ServiceNow incident assignment list cURL request was successful.');
@@ -291,7 +290,7 @@ function _servicenow_curl_request($form_values) {
   $request = variable_get('sn_environment', 'https://coloradosandbox.service-now.com') . '/api/now/table/incident';
   $data = json_encode($form_values);
 
-  $ch = curl_init(); // initialize curl handle
+  $ch = curl_init();
   curl_setopt($ch, CURLOPT_HTTPHEADER, Array("Accept:application/json","Content-Type:application/json"));
   curl_setopt($ch, CURLOPT_USERPWD, $conf['sn_key']);
   curl_setopt($ch, CURLOPT_URL, $request);
@@ -299,13 +298,13 @@ function _servicenow_curl_request($form_values) {
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
   curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
   curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-  $result = curl_exec($ch); // run the whole process
+  $result = curl_exec($ch);
   curl_setopt($ch, CURLOPT_HEADER, 1);
   curl_setopt($ch, CURLOPT_VERBOSE, 1);
-  //$header = curl_exec($ch); // run the whole process
   curl_close($ch); // close cURL handler
 
   $result = json_decode($result);
+  dpm($result, 'incident request');
 
   //$result->headers = $headers;
   if ( (!isset($result->status)) && (!empty($result)) ) {
@@ -335,13 +334,11 @@ function _servicenow_curl_request($form_values) {
  */
 function _servicenow_upload_file($sys_id, $file_pathinfo, $file_mimetype) {
   global $conf;
-  //$sys_id = '648816114fa523000e7decee0210c79f'; // INC0478268 in sandbox
 
   $request = variable_get('sn_environment', 'https://coloradosandbox.service-now.com');
   $request .= '/api/now/attachment/upload';
 
   $ch = curl_init();
-  // -F 'table_name=incident' -F 'table_sys_id=d71f7935c0a8016700802b64c67c11c6' -F 'encryption_context=undefined'-F 'uploadFile=@ location of the file on file system'
 
   // drupal_realpath should only be used when we control the variable being used.
   // Otherwise there are security risks involved.
@@ -367,5 +364,45 @@ function _servicenow_upload_file($sys_id, $file_pathinfo, $file_mimetype) {
     $result = curl_error($ch);
   }
   watchdog('cu_servicenow', 'File attachment sent to SerivieNow: ' . $result);
+  curl_close ($ch);
+}
+
+/**
+ * cURL request for reporting the form's metadata back to SN.
+ */
+function _form_report_thyself() {
+  global $conf;
+  global $base_url;
+
+  $request = variable_get('sn_environment', 'https://coloradosandbox.service-now.com');
+  //$request .= '/u_web_express_forms_list.do?sysparm_offset=&sysparm_list_mode=grid&sysparm_query=';
+  $request .= '/api/now/v2/table/u_web_express_forms';
+
+  $data = [
+    "u_form_name" => "Form, report thyself.",
+    "u_nature_of_issue" => "0773c647d94e31000a24ea2e4590a2da",
+    "u_order" => "87",
+    "u_table" => "incident",
+    "url" => $base_url,
+  ];
+
+  $data = json_encode($data);
+  dpm($data, 'JSON result: ');
+
+  $ch = curl_init();
+  curl_setopt($ch, CURLOPT_POST, 1);
+  curl_setopt($ch, CURLOPT_HTTPHEADER, Array("Content-Type:application/json"));
+  curl_setopt($ch, CURLOPT_USERPWD, $conf['sn_key']);
+  curl_setopt($ch, CURLOPT_URL, $request);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+  $result = curl_exec($ch);
+  dpm($result, 'Form reporting:');
+
+  if (curl_errno($ch)) {
+    $result = curl_error($ch);
+  }
+  watchdog('cu_servicenow', 'Form report sent to SerivieNow: ' . $result);
   curl_close ($ch);
 }
