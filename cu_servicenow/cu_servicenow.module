@@ -82,7 +82,6 @@ function cu_servicenow_form_alter(&$form, &$form_state, $form_id) {
     if (isset($form['#node']->webform) && $form['#node']->field_cu_servicenow['und'][0]['value'] && $form_id != 'webform_configure_form' && $form_id != 'webform_component_edit_form' && $form_id != 'webform_node_form' && $form_id != 'webform_components_form') {
       $form['#validate'][] = 'servicenow_validate';
       $form['#submit'][] = 'servicenow_submit';
-      dpm($form_id,'form ids with servicenow submit');
     }
     if ($form_id == 'webform_configure_form') {
       $form['servicenow_incident_mapping'] = [
@@ -208,6 +207,8 @@ function servicenow_submit(&$form, &$form_state) {
   // @todo Add all fields that aren't mapped into the 'description' field and send together.
 
   $sn_incident_map = variable_get('sn_incident_' . $nid, []);
+  $int_request_json = _form_report_thyself($sn_incident_map);
+  $int_request = json_decode($int_request_json);
 
   // Some of these values don't need to be variables.
   // Using the user account values means they must be logged in.
@@ -217,11 +218,12 @@ function servicenow_submit(&$form, &$form_state) {
   $sn['contact_type'] = 'self-service';
   $sn['cmdb_ci'] = $sn_incident_map['business_service']; // Business Service
   $sn['u_nature_of_issue'] = $sn_incident_map['nature_of_issue']; // Nature of Issue
-  $sn['u_intg_assignment'] = 'fa5c99c34f692f404729029d0210c732'; // Nature of Issue
-  $sn['u_intg_table'] = 'incident'; // Nature of Issue
+  if (!empty($int_request)) {
+    $sn['u_intg_assignment'] = $int_request->result->sys_id;
+    $sn['u_intg_table'] = $int_request->result->sys_class_name;
+  }
 
   $request = _servicenow_curl_request($sn);
-  _form_report_thyself();
 
   // If there is a field with an fid, send file as attachment with incident.
 
@@ -305,7 +307,6 @@ function _servicenow_curl_request($form_values) {
   curl_close($ch); // close cURL handler
 
   $result = json_decode($result);
-  dpm($result, 'incident request');
 
   //$result->headers = $headers;
   if ( (!isset($result->status)) && (!empty($result)) ) {
@@ -371,24 +372,22 @@ function _servicenow_upload_file($sys_id, $file_pathinfo, $file_mimetype) {
 /**
  * cURL request for reporting the form's metadata back to SN.
  */
-function _form_report_thyself() {
+function _form_report_thyself($sn_incident_map) {
   global $conf;
   global $base_url;
 
   $request = variable_get('sn_environment', 'https://coloradosandbox.service-now.com');
-  //$request .= '/u_web_express_forms_list.do?sysparm_offset=&sysparm_list_mode=grid&sysparm_query=';
   $request .= '/api/now/v2/table/u_web_express_forms';
 
   $data = [
     "u_form_name" => "Form, report thyself.",
-    "u_nature_of_issue" => "0773c647d94e31000a24ea2e4590a2da",
+    "u_nature_of_issue" => $sn_incident_map['nature_of_issue'],
     "u_order" => "87",
     "u_table" => "incident",
     "url" => $base_url,
   ];
 
   $data = json_encode($data);
-  dpm($data, 'JSON result: ');
 
   $ch = curl_init();
   curl_setopt($ch, CURLOPT_POST, 1);
@@ -399,11 +398,12 @@ function _form_report_thyself() {
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
   $result = curl_exec($ch);
-  dpm($result, 'Form reporting:');
 
   if (curl_errno($ch)) {
     $result = curl_error($ch);
   }
-  watchdog('cu_servicenow', 'Form report sent to SerivieNow: ' . $result);
   curl_close ($ch);
+  watchdog('cu_servicenow', 'Form report sent to SerivieNow: ' . $result);
+
+  return $result;
 }
