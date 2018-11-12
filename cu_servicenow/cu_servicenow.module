@@ -79,9 +79,10 @@ function cu_servicenow_form_webform_node_form_alter(&$form, &$form_state) {
 function cu_servicenow_form_alter(&$form, &$form_state, $form_id) {
   $sn_status = variable_get('sn_status', 'enabled');
   if ($sn_status == 'enabled') {
-    if (isset($form['#node']->webform) && $form['#node']->field_cu_servicenow['und'][0]['value'] && $form_id != 'webform_configure_form' && $form_id != 'webform_component_edit_form' && $form_id != 'webform_node_form') {
+    if (isset($form['#node']->webform) && $form['#node']->field_cu_servicenow['und'][0]['value'] && $form_id != 'webform_configure_form' && $form_id != 'webform_component_edit_form' && $form_id != 'webform_node_form' && $form_id != 'webform_components_form') {
       $form['#validate'][] = 'servicenow_validate';
       $form['#submit'][] = 'servicenow_submit';
+      dpm($form_id,'form ids with servicenow submit');
     }
     if ($form_id == 'webform_configure_form') {
       $form['servicenow_incident_mapping'] = [
