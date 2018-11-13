@@ -173,7 +173,6 @@ function servicenow_incident_mapping_submit($form, &$form_state) {
   $int_request = json_decode($int_request_json);
   $form_setting_nid = $form['nid']['#value'];
   variable_set('sn_report_form_' . $form_setting_nid, $int_request->result);
-  dpm($int_request, 'Int req');
 }
 
 function servicenow_save_field_map_submit($form, &$form_state) {
@@ -208,6 +207,7 @@ function servicenow_submit(&$form, &$form_state) {
   // If the current node has SN enabled, do code, else move on.
   $form_values = $form_state['input']['submitted'];
   $sn_field_map = variable_get('sn_field_mapping', '');
+  $sn_form_report = variable_get('sn_report_form_' . $nid, '');
 
   foreach($form_values as $key => $value) {
     if(key_exists($key, $sn_field_map)) {
@@ -227,13 +227,13 @@ function servicenow_submit(&$form, &$form_state) {
   $sn['contact_type'] = 'self-service';
   $sn['cmdb_ci'] = $sn_incident_map['business_service']; // Business Service
   $sn['u_nature_of_issue'] = $sn_incident_map['nature_of_issue']; // Nature of Issue
-  //$sn['u_intg_assignment'] = $int_request->result->sys_id;
-  //$sn['u_intg_table'] = $int_request->result->sys_class_name;
+  $sn['u_intg_assignment'] = $sn_form_report->sys_id;
+  $sn['u_intg_table'] = $sn_form_report->sys_class_name;
 
   $request = _servicenow_curl_request($sn);
+  dpm($request, 'incident response');
 
   // If there is a field with an fid, send file as attachment with incident.
-
   foreach ($form_state['complete form']['submitted'] as $field) {
     if (isset($field['#type']) && $field['#type'] == 'managed_file' && $field['#value']['fid'] != 0) {
       $file = $form_state['complete form']['submitted'][$field['#title']]['#file'];
