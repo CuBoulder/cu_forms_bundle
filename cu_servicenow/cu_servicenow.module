@@ -286,7 +286,10 @@ function servicenow_submit(&$form, &$form_state) {
 
   // If there is a field with an fid, send file as attachment with incident.
   foreach ($form_state['complete form']['submitted'] as $key_submitted => $field) {
-    if (isset($field['#type']) && $field['#type'] == 'managed_file' && $field['#value']['fid'] != 0) {
+    if (isset($field['#type'])
+        && $field['#type'] == 'managed_file'
+        && $field['#value']['fid'] != 0
+        && $sn_field_map[$key_submitted] == $key_submitted) {
       $file = $form_state['complete form']['submitted'][$key_submitted]['#file'];
       $location = $base_url . '/sites/default/files/';
       $location = str_replace('public://', $location, $file->uri);
