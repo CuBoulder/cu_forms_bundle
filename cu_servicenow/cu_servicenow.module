@@ -285,9 +285,9 @@ function servicenow_submit(&$form, &$form_state) {
   $request = _servicenow_curl_request($sn);
 
   // If there is a field with an fid, send file as attachment with incident.
-  foreach ($form_state['complete form']['submitted'] as $field) {
+  foreach ($form_state['complete form']['submitted'] as $key_submitted => $field) {
     if (isset($field['#type']) && $field['#type'] == 'managed_file' && $field['#value']['fid'] != 0) {
-      $file = $form_state['complete form']['submitted'][$field['#title']]['#file'];
+      $file = $form_state['complete form']['submitted'][$key_submitted]['#file'];
       $location = $base_url . '/sites/default/files/';
       $location = str_replace('public://', $location, $file->uri);
 
@@ -423,7 +423,8 @@ function _servicenow_upload_file($sys_id, $file_pathinfo, $file_mimetype) {
   if (curl_errno($ch)) {
     $result = curl_error($ch);
   }
-  watchdog('cu_servicenow', 'File attachment sent to SerivieNow: ' . $result);
+
+  watchdog('cu_servicenow', 'File attachment sent to ServiceNow: ' . $result);
   curl_close ($ch);
 }
 
