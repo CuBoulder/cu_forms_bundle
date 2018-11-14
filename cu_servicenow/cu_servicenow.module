@@ -22,7 +22,8 @@
  * the _servicenow_submit function and that is what sends in the incident with
  * its associated data to ServiceNow.
  *
- * If there is a FID (File ID) within that form, then cURL 3 is called. It's
+ * If there is a FID (File ID) within that form and the field has been mapped
+ * to the "attachment" option of sn_field_mapping, then cURL 3 is called. It's
  * called only after cURL 2 has successfully created the incident. We use the
  * table_sys_id from the incident response from cURL 2 to populate the needed
  * values for cURL 3. That's sent directly after cURL 2 but also within the
@@ -284,7 +285,7 @@ function servicenow_submit(&$form, &$form_state) {
 
   $request = _servicenow_curl_request($sn);
 
-  // If there is a field with an fid, send file as attachment with incident.
+  // If there is a field with an fid that has been field mapped with "attachment", send file as attachment with incident.
   foreach ($form_state['complete form']['submitted'] as $key_submitted => $field) {
     if (isset($field['#type'])
         && $field['#type'] == 'managed_file'
