@@ -194,7 +194,7 @@ function servicenow_incident_mapping_validate($form, &$form_state) {
 
   if (!isset($existing_form_report) && $form_state['values']['form_report'] == FALSE) {
     form_set_error('form_report', t('You need to send an initial report of your form.'));
-  } else if (isset($existing_form_report) && $forms_current_incident_assignment !== $form_state['values']['options']) {
+  } else if (isset($existing_form_report) && $forms_current_incident_assignment !== $form_state['values']['options'] && $form_state['values']['form_report'] == FALSE) {
     form_set_error('form_report', t('You have changed the incident assignment and need to report your form.'));
   }
 }
