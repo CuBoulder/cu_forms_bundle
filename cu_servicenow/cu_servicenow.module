@@ -2,7 +2,36 @@
 
 /**
  * @file
- * This module sets up a boolean value for webforms to integrate with ServiceNow.
+ * This module sets up a boolean value for webforms to integrate with
+ * ServiceNow.
+ *
+ * cURL requests in this module:
+ *   1 - Nature of Issue of form: _servicenow_incident_assignments()
+ *   2 - Create Incident: _servicenow_curl_request($form_values)
+ *   3 - Attachment API: _servicenow_upload_file($sys_id, $file_pathinfo,
+ *                   $file_mimetype)
+ *   4 - Form Report: _form_report_thyself($sn_incident_map, $form_name)
+ *
+ * cURL request 1 is called when you visit the "Form settings" tab in the form
+ * edit page. Upon save, the values selected from cURL 1 are used to populate
+ * cURL 4 and the cURL 4 request is sent. The response from cURL 4 is used to
+ * set a custom variable that sends the "intg" fields in with the incidents
+ * from that form. Thus reporting a submission from that form.
+ *
+ * cURL request 2 is called when a submission is made. Clicking submit calls
+ * the _servicenow_submit function and that is what sends in the incident with
+ * its associated data to ServiceNow.
+ *
+ * If there is a FID (File ID) within that form, then cURL 3 is called. It's
+ * called only after cURL 2 has successfully created the incident. We use the
+ * table_sys_id from the incident response from cURL 2 to populate the needed
+ * values for cURL 3. That's sent directly after cURL 2 but also within the
+ * _servicenow_submit function.
+ *
+ * Because we set a custom variable for the "intg" fields, we automatically
+ * report the form submission when the incident is created.
+ *
+ * And that is why we have 4 different cURL requests.
  */
 
 function cu_servicenow_menu() {
@@ -231,7 +260,6 @@ function servicenow_submit(&$form, &$form_state) {
   $sn['u_intg_table'] = $sn_form_report->sys_class_name;
 
   $request = _servicenow_curl_request($sn);
-  dpm($request, 'incident response');
 
   // If there is a field with an fid, send file as attachment with incident.
   foreach ($form_state['complete form']['submitted'] as $field) {
