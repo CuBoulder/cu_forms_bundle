@@ -322,6 +322,7 @@ function _servicenow_incident_assignments() {
   global $conf;
   $incident_assignment = variable_get('sn_environment', 'https://coloradosandbox.service-now.com') . '/api/now/v2/table/u_inc_assignment?sysparm_fields=sys_id,u_business_service,u_nature_of_issue,u_active,sys_updated_on&sysparm_display_value=true&sysparm_exclude_reference_link=true';
 
+  //
   $ch = curl_init();
   curl_setopt($ch, CURLOPT_HTTPHEADER, Array("Accept:application/json","Content-Type:application/json"));
   curl_setopt($ch, CURLOPT_USERPWD, $conf['sn_key']);
