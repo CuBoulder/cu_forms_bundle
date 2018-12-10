@@ -161,11 +161,11 @@ function cu_feedback_preprocess_html(&$variables) {
 
     $path = 'node/' . $nid;
     $link_class[] = 'cu-feedback-link';
-    $link_class[] = 'cu-feedback-link-' . $color;
+    $link_class[] = 'background-' . $color;
     $link_class[] = $embed === 'embed' ? 'cu-feedback-link-embed' : '';
     $link = l('<i class="fa fa-chevron-up"></i> ' . check_plain($label), $path, array('html' => TRUE, 'attributes' => array('class' => $link_class)));
 
-    $variables['page']['page_bottom']['cu_feedback']['#markup'] = '<div id="cu-feedback">' . $link;
+    $variables['page']['page_bottom']['cu_feedback']['#markup'] = '<div id="cu-feedback" class="background-' . $color . '">' . $link;
     if ($embed) {
       $node_content = node_view(node_load($nid));
       $form_content = drupal_render($node_content);
