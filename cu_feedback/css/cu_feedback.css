@@ -9,26 +9,13 @@
   //background: rgba(255,255,255,.10);
   padding: 5px 5px 0 5px;
 }
-#cu-feedback a.cu-feedback-link:link,
-#cu-feedback a.cu-feedback-link:visited {
-  
+#cu-feedback a.cu-feedback-link,
+#cu-feedback a.cu-feedback-link {
+
   padding:10px;
   font-size: 12px;
   display: block;
   font-weight: bold;
-}
-#cu-feedback a.cu-feedback-link-blue {
-  background-color:#007BC8;
-  color:#fff;
-}
-#cu-feedback a.cu-feedback-link-gold {
-  background-color:#cfb87c;
-  color:#000;
-  
-}
-#cu-feedback a.cu-feedback-link:hover {
-  background: #000;
-  color:#fff
 }
 #cu-feedback a.cu-feedback-link i.fa {
   float: right;
@@ -40,6 +27,10 @@
   color:#363636;
   display: none;
   border:1px solid #ddd;
+}
+#cu-feedback-content a {
+  //color: #0277BD;
+  color: inherit;
 }
 #cu-feedback h2.node-title {
   display: none;
