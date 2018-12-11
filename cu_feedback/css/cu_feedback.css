@@ -5,17 +5,16 @@
   z-index: 1;
   width:240px;
   font-size: 12px;
-  //background: rgb(255,255,255);
-  //background: rgba(255,255,255,.10);
-  padding: 5px 5px 0 5px;
+
 }
-#cu-feedback a.cu-feedback-link,
-#cu-feedback a.cu-feedback-link {
+#cu-feedback a.cu-feedback-link.button {
 
   padding:10px;
   font-size: 12px;
   display: block;
   font-weight: bold;
+  border-radius: 0;
+  margin-bottom: 0;
 }
 #cu-feedback a.cu-feedback-link i.fa {
   float: right;
@@ -23,15 +22,11 @@
 }
 #cu-feedback-content {
   background: #fff;
-  padding: 10px;
   color:#363636;
   display: none;
   border:1px solid #ddd;
 }
-#cu-feedback-content a {
-  //color: #0277BD;
-  color: inherit;
-}
+
 #cu-feedback h2.node-title {
   display: none;
 }
