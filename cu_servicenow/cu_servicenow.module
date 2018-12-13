@@ -128,7 +128,7 @@ function cu_servicenow_form_alter(&$form, &$form_state, $form_id) {
 
       $sn_incident = [];
       foreach ($incidents->result as $incident) {
-        $sn_incident[$incident->sys_id] = $incident->u_nature_of_issue . ': ' . $incident->u_business_service;
+        $sn_incident[$incident->sys_id] = $incident->u_business_service . ': ' . $incident->u_nature_of_issue;
       }
       asort($sn_incident);
       if (!empty($sn_incident)) {
