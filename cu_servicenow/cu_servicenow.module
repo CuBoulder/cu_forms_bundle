@@ -271,11 +271,6 @@ function servicenow_submit(&$form, &$form_state) {
     }
   }
 
-  dpm($form_values, 'Form values');
-  dpm($sn_field_map, 'SN field map');
-  dpm($sn, 'SN values');
-  dpm($non_sn_field_values, 'Non SN values');
-
   // @todo Add all fields that aren't mapped into the 'description' field and send together.
 
   $sn_incident_map = variable_get('sn_incident_' . $nid, []);
@@ -383,7 +378,6 @@ function _servicenow_curl_request($form_values) {
   curl_close($ch); // close cURL handler
 
   $result = json_decode($result);
-  dpm($result, 'cURL request result');
 
   //$result->headers = $headers;
   if ( (!isset($result->status)) && (!empty($result)) ) {
