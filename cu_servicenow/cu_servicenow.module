@@ -130,8 +130,9 @@ function cu_servicenow_form_alter(&$form, &$form_state, $form_id) {
       foreach ($incidents->result as $incident) {
         $sn_incident[$incident->sys_id] = $incident->u_business_service . ': ' . $incident->u_nature_of_issue;
       }
-      asort($sn_incident);
+
       if (!empty($sn_incident)) {
+        asort($sn_incident);
         $options = $sn_incident;
       } else {
         $options = ['N/A' => 'N/A'];
