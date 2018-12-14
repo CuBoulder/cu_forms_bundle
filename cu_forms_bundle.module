@@ -13,6 +13,7 @@
 function cu_forms_bundle_secure_permissions_roles() {
   return array(
     'form_manager',
+    'form_submitter',
   );
 }
 
@@ -83,6 +84,11 @@ function cu_forms_bundle_secure_permissions($role) {
     'content_editor' => array(
       'edit webform components',
       'view unused forms',
+    ),
+    'form_submitter' => array(
+      'edit own webform submissions',
+      'access own webform submissions',
+      'delete own webform submissions',
     ),
     'form_manager' => array(
       'access own webform results',
