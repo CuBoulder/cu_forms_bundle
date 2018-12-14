@@ -65,10 +65,10 @@ function cu_servicenow_config_form($form, &$form_state) {
   $form['sn_status'] = [
     '#type' => 'select',
     '#title' => t('Status'),
-     '#options' => array(
-        'enabled' => t('Enabled'),
-        'disabled' => t('Disabled'),
-     ),
+    '#options' => array(
+      'enabled' => t('Enabled'),
+      'disabled' => t('Disabled'),
+    ),
     '#default_value' => variable_get('sn_status', 'enabled'),
   ];
   $form['submit'] = [
@@ -110,10 +110,10 @@ function cu_servicenow_form_alter(&$form, &$form_state, $form_id) {
   $sn_status = variable_get('sn_status', 'enabled');
   if ($sn_status == 'enabled') {
     if (isset($form['#node']->webform) && $form['#node']->field_cu_servicenow['und'][0]['value']
-        && $form_id != 'webform_configure_form'
-        && $form_id != 'webform_component_edit_form'
-        && $form_id != 'webform_node_form'
-        && $form_id != 'webform_components_form') {
+      && $form_id != 'webform_configure_form'
+      && $form_id != 'webform_component_edit_form'
+      && $form_id != 'webform_node_form'
+      && $form_id != 'webform_components_form') {
       $form['#validate'][] = 'servicenow_validate';
       $form['#submit'][] = 'servicenow_submit';
     }
@@ -264,10 +264,17 @@ function servicenow_submit(&$form, &$form_state) {
   $sn_form_report = variable_get('sn_report_form_' . $nid, '');
 
   foreach($form_values as $key => $value) {
-    if(key_exists($key, $sn_field_map)) {
+    if(key_exists($key, $sn_field_map) && $sn_field_map[$key] != 'N/A') {
       $sn[$sn_field_map[$key]] = $value;
+    } else {
+      $non_sn_field_values[$key] = $value;
     }
   }
+
+  dpm($form_values, 'Form values');
+  dpm($sn_field_map, 'SN field map');
+  dpm($sn, 'SN values');
+  dpm($non_sn_field_values, 'Non SN values');
 
   // @todo Add all fields that aren't mapped into the 'description' field and send together.
 
@@ -284,21 +291,26 @@ function servicenow_submit(&$form, &$form_state) {
   $sn['u_intg_assignment'] = $sn_form_report->sys_id;
   $sn['u_intg_table'] = $sn_form_report->sys_class_name;
 
+  // For each non SN field value, add it to the end of the description field.
+  foreach ($non_sn_field_values as $key => $value) {
+    $sn['description'] .= ' -- (' . $key . ': ' . $value . ')';
+  }
+
   $request = _servicenow_curl_request($sn);
 
   // If there is a field with an fid that has been field mapped with "attachment", send file as attachment with incident.
   foreach ($form_state['complete form']['submitted'] as $key_submitted => $field) {
     if (isset($field['#type'])
-        && $field['#type'] == 'managed_file'
-        && $field['#value']['fid'] != 0
-        && $sn_field_map[$key_submitted] == $key_submitted) {
+      && $field['#type'] == 'managed_file'
+      && $field['#value']['fid'] != 0
+      && $sn_field_map[$key_submitted] == $key_submitted) {
       $file = $form_state['complete form']['submitted'][$key_submitted]['#file'];
       $location = $base_url . '/sites/default/files/';
       $location = str_replace('public://', $location, $file->uri);
 
       foreach ($form_values as $form_value) {
         if (is_array($form_value) && key_exists('fid', $form_value)) {
-          $sn['description'] .= '\r\n(File location: ' . $location . ')';
+          $sn['description'] .= ' -- (File location: ' . $location . ')';
         }
       }
 
@@ -371,6 +383,7 @@ function _servicenow_curl_request($form_values) {
   curl_close($ch); // close cURL handler
 
   $result = json_decode($result);
+  dpm($result, 'cURL request result');
 
   //$result->headers = $headers;
   if ( (!isset($result->status)) && (!empty($result)) ) {
