@@ -393,7 +393,7 @@ function _servicenow_curl_request($form_values) {
     $result->status = 'failure';
   }
   if ( ($result->status == 'failure') || (empty($result)) ) {
-    watchdog('cu_servicenow', 'ServiceNow api not communicating correctly: ' . $request);
+    watchdog('cu_servicenow', 'ServiceNow API not communicating correctly: ' . $request);
     drupal_set_message(t('There was a problem sending your request to ServiceNow. Please contact the site owner.'), 'success');
     return null;
   } else {

@@ -4,7 +4,7 @@
 This module is meant to use a single service account username and password.
 This must be set in the site's settings.php file under the conf variable:
 
-`$conf['sn_key'] = 'username:password';`
+`$conf['sn_key'] = 'password';`
 
 Without this key, your module will not be able to make any calls to the 
 ServiceNow (SN) URL.
