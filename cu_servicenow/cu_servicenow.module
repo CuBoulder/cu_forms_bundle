@@ -394,12 +394,12 @@ function _servicenow_curl_request($form_values) {
   }
   if ( ($result->status == 'failure') || (empty($result)) ) {
     watchdog('cu_servicenow', 'ServiceNow API not communicating correctly: ' . $request);
-    drupal_set_message(t('There was a problem sending your request to ServiceNow. Please contact the site owner.'), 'success');
+    drupal_set_message(t('There was a problem sending your request to ServiceNow. Please contact the site owner.'), 'status');
     return null;
   } else {
     $inc_num = $result->result->number;
     watchdog('cu_servicenow', 'ServiceNow incident was successfully sent: :incident', array(':incident' => $inc_num));
-    drupal_set_message(t('Your incident number is :incident, please keep this number for your records.', array(':incident' => $inc_num)), 'success');
+    drupal_set_message(t('Your incident number is :incident, please keep this number for your records.', array(':incident' => $inc_num)), 'status');
     return $result;
   }
 }
@@ -484,7 +484,7 @@ function _form_report_thyself($sn_incident_map, $form_name) {
     $result = curl_error($ch);
   }
   curl_close ($ch);
-  watchdog('cu_servicenow', 'Form report sent to SerivieNow: ' . $result);
+  watchdog('cu_servicenow', 'Form report sent to ServiceNow: ' . $result);
 
   return $result;
 }
