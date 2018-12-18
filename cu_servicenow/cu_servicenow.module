@@ -394,7 +394,7 @@ function _servicenow_curl_request($form_values) {
   }
   if ( ($result->status == 'failure') || (empty($result)) ) {
     watchdog('cu_servicenow', 'ServiceNow API not communicating correctly: ' . $request);
-    drupal_set_message(t('There was a problem sending your request to ServiceNow. Please contact the site owner.'), 'status');
+    drupal_set_message(t('There was a problem sending your request to ServiceNow. Please contact the site owner.'), 'error');
     return null;
   } else {
     $inc_num = $result->result->number;
