@@ -89,6 +89,8 @@ function cu_servicenow_config_form_validate($form, &$form_state) {
 function cu_servicenow_config_form_submit($form, &$form_state) {
   variable_set('sn_environment', $form_state['values']['sn_environment']);
   variable_set('sn_status', $form_state['values']['sn_status']);
+  watchdog('cu_servicenow', t('ServiceNow config form changes have been saved.'));
+  drupal_set_message(t('Your changes have been saved.'), 'status');
 }
 
 /**
@@ -124,10 +126,13 @@ function cu_servicenow_form_alter(&$form, &$form_state, $form_id) {
       ];
 
       $incidents = _servicenow_incident_assignments();
+      $incidents = $incidents->result;
+
       $nid = $form['#node']->nid;
 
       $sn_incident = [];
-      foreach ($incidents->result as $incident) {
+
+      foreach ($incidents as $incident) {
         $sn_incident[$incident->sys_id] = $incident->u_business_service . ': ' . $incident->u_nature_of_issue;
       }
 
@@ -328,12 +333,13 @@ function servicenow_submit(&$form, &$form_state) {
  */
 function _servicenow_incident_assignments() {
   global $conf;
+  $sn_key = 'wexpress:' . $conf['sn_key'];
   $incident_assignment = variable_get('sn_environment', 'https://coloradosandbox.service-now.com') . '/api/now/v2/table/u_inc_assignment?sysparm_fields=sys_id,u_business_service,u_nature_of_issue,u_active,sys_updated_on&sysparm_display_value=true&sysparm_exclude_reference_link=true';
 
   //
   $ch = curl_init();
   curl_setopt($ch, CURLOPT_HTTPHEADER, Array("Accept:application/json","Content-Type:application/json"));
-  curl_setopt($ch, CURLOPT_USERPWD, $conf['sn_key']);
+  curl_setopt($ch, CURLOPT_USERPWD, $sn_key);
   curl_setopt($ch, CURLOPT_URL, $incident_assignment);
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
   curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
@@ -360,13 +366,14 @@ function _servicenow_incident_assignments() {
  */
 function _servicenow_curl_request($form_values) {
   global $conf;
+  $sn_key = 'wexpress:' . $conf['sn_key'];
 
   $request = variable_get('sn_environment', 'https://coloradosandbox.service-now.com') . '/api/now/table/incident';
   $data = json_encode($form_values);
 
   $ch = curl_init();
   curl_setopt($ch, CURLOPT_HTTPHEADER, Array("Accept:application/json","Content-Type:application/json"));
-  curl_setopt($ch, CURLOPT_USERPWD, $conf['sn_key']);
+  curl_setopt($ch, CURLOPT_USERPWD, $sn_key);
   curl_setopt($ch, CURLOPT_URL, $request);
   curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -407,6 +414,7 @@ function _servicenow_curl_request($form_values) {
  */
 function _servicenow_upload_file($sys_id, $file_pathinfo, $file_mimetype) {
   global $conf;
+  $sn_key = 'wexpress:' . $conf['sn_key'];
 
   $request = variable_get('sn_environment', 'https://coloradosandbox.service-now.com');
   $request .= '/api/now/attachment/upload';
@@ -429,7 +437,7 @@ function _servicenow_upload_file($sys_id, $file_pathinfo, $file_mimetype) {
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
   curl_setopt($ch, CURLOPT_POST, 1);
   curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-  curl_setopt($ch, CURLOPT_USERPWD, $conf['sn_key']);
+  curl_setopt($ch, CURLOPT_USERPWD, $sn_key);
 
   $result = curl_exec($ch);
 
@@ -447,6 +455,7 @@ function _servicenow_upload_file($sys_id, $file_pathinfo, $file_mimetype) {
 function _form_report_thyself($sn_incident_map, $form_name) {
   global $conf;
   global $base_url;
+  $sn_key = 'wexpress:' . $conf['sn_key'];
 
   $request = variable_get('sn_environment', 'https://coloradosandbox.service-now.com');
   $request .= '/api/now/v2/table/u_web_express_forms';
@@ -464,7 +473,7 @@ function _form_report_thyself($sn_incident_map, $form_name) {
   $ch = curl_init();
   curl_setopt($ch, CURLOPT_POST, 1);
   curl_setopt($ch, CURLOPT_HTTPHEADER, Array("Content-Type:application/json"));
-  curl_setopt($ch, CURLOPT_USERPWD, $conf['sn_key']);
+  curl_setopt($ch, CURLOPT_USERPWD, $sn_key);
   curl_setopt($ch, CURLOPT_URL, $request);
   curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
