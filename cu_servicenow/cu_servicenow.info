@@ -1,5 +1,5 @@
 name = CU ServiceNow
-description = ServiceNow Webform integration.
+description = ServiceNow Webform integration added in cu_forms_bundle version 7.x-2.3.
 core = 7.x
 package = Features
 version = 7.x-1.0
