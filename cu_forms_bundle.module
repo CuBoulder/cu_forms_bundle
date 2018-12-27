@@ -1,5 +1,38 @@
 <?php
 
+//function cu_forms_bundle_page_alter(&$page) {
+//  $output = db_query('SELECT DISTINCT nid from webform_component WHERE type != \'pagebreak\'')->fetchAllKeyed();
+//
+//  dpm($output);
+//}
+
+function cu_forms_bundle_node_presave($node) {
+  if ($node->type === 'webform') {
+    $form_components = $node->webform['components'];
+
+    $types = [];
+    foreach ($form_components as $form_component) {
+      foreach ($form_component as $key => $value) {
+        if ($key == 'type') {
+          $types[] = $value;
+        }
+      }
+    }
+
+    if (!in_array('pagebreak', $types) || sizeof($types) == 0) {
+      $node->webform['progressbar_bar'] = FALSE;
+      drupal_set_message(t('Progress bar has been unchecked due to your lack of faith.'));
+      dpm($types, 'types output on success');
+    } else {
+      drupal_set_message(t('You have failed me for the last time.'), 'error');
+      dpm($types, 'failure of types output');
+    }
+  }
+}
+
+function cu_forms_bundle_form_alter($form, &$form_state, &$form_id) {
+  dpm($form_id, 'Form alter for form id');
+}
 
 /**
  * Define site roles in code.
