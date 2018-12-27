@@ -1,13 +1,15 @@
 <?php
 
-//function cu_forms_bundle_page_alter(&$page) {
-//  $output = db_query('SELECT DISTINCT nid from webform_component WHERE type != \'pagebreak\'')->fetchAllKeyed();
-//
-//  dpm($output);
-//}
 
+/**
+ * Implements hook_node_presave().
+ *
+ * As of webform 4.18, progress bars appear on every form.
+ * This presave removes the progress bar if node is new.
+ * At any point, the author can add the progress bar back.
+ */
 function cu_forms_bundle_node_presave($node) {
-  if ($node->type === 'webform') {
+  if ($node->is_new && $node->type === 'webform') {
     $form_components = $node->webform['components'];
 
     $types = [];
@@ -20,18 +22,10 @@ function cu_forms_bundle_node_presave($node) {
     }
 
     if (!in_array('pagebreak', $types) || sizeof($types) == 0) {
-      $node->webform['progressbar_bar'] = FALSE;
+      $node->webform['progressbar_bar'] = 0;
       drupal_set_message(t('Progress bar has been unchecked due to your lack of faith.'));
-      dpm($types, 'types output on success');
-    } else {
-      drupal_set_message(t('You have failed me for the last time.'), 'error');
-      dpm($types, 'failure of types output');
     }
   }
-}
-
-function cu_forms_bundle_form_alter($form, &$form_state, &$form_id) {
-  dpm($form_id, 'Form alter for form id');
 }
 
 /**
