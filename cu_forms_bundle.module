@@ -2,6 +2,33 @@
 
 
 /**
+ * Implements hook_node_presave().
+ *
+ * As of webform 4.18, progress bars appear on every form.
+ * This presave removes the progress bar if node is new.
+ * At any point, the author can add the progress bar back.
+ */
+function cu_forms_bundle_node_presave($node) {
+  if ($node->is_new && $node->type === 'webform') {
+    $form_components = $node->webform['components'];
+
+    $types = [];
+    foreach ($form_components as $form_component) {
+      foreach ($form_component as $key => $value) {
+        if ($key == 'type') {
+          $types[] = $value;
+        }
+      }
+    }
+
+    if (!in_array('pagebreak', $types) || sizeof($types) == 0) {
+      $node->webform['progressbar_bar'] = 0;
+      drupal_set_message(t('Progress bar has been unchecked due to your lack of faith.'));
+    }
+  }
+}
+
+/**
  * Define site roles in code.
  *
  * Create a secure_permissions_data module directory and place this function
