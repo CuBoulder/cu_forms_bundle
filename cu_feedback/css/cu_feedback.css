@@ -2,33 +2,20 @@
   position: fixed;
   right:15px;
   bottom:0;
-  z-index: 1;
+  z-index: 100;
   width:240px;
   font-size: 12px;
-  background: rgb(255,255,255);
-  background: rgba(255,255,255,.10);
-  padding: 5px 5px 0 5px;
+  max-height: 75%;
+  overflow-y: scroll;
 }
-#cu-feedback a.cu-feedback-link:link,
-#cu-feedback a.cu-feedback-link:visited {
-  
+#cu-feedback a.cu-feedback-link.button {
+
   padding:10px;
   font-size: 12px;
   display: block;
   font-weight: bold;
-}
-#cu-feedback a.cu-feedback-link-blue {
-  background-color:#007BC8;
-  color:#fff;
-}
-#cu-feedback a.cu-feedback-link-gold {
-  background-color:#cfb87c;
-  color:#000;
-  
-}
-#cu-feedback a.cu-feedback-link:hover {
-  background: #000;
-  color:#fff
+  border-radius: 0;
+  margin-bottom: 0;
 }
 #cu-feedback a.cu-feedback-link i.fa {
   float: right;
@@ -36,11 +23,11 @@
 }
 #cu-feedback-content {
   background: #fff;
-  padding: 10px;
   color:#363636;
   display: none;
   border:1px solid #ddd;
 }
+
 #cu-feedback h2.node-title {
   display: none;
 }
